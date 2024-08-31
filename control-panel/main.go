@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type Project struct {
@@ -13,21 +15,40 @@ type Project struct {
 	Name    string `json:"name"`
 }
 
-func GetProjects() *[]Project {
+func CreateMockProjects(db *gorm.DB) {
+	db.AutoMigrate(&Project{})
+
 	p := []Project{
 		{Acronym: "dcc", Name: "DCC"},
 		{Acronym: "dsi", Name: "DSI"},
 		{Acronym: "customer-identity", Name: "Customer Identity"},
 	}
 
-	return &p
+	for _, it := range p {
+		db.Create(it)
+	}
+}
+
+func GetAllProjects(db *gorm.DB) *[]Project {
+	var projects []Project
+
+	db.Find(&projects)
+
+	return &projects
 }
 
 func main() {
 	router := mux.NewRouter()
 
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed connecting to database")
+	}
+
+	CreateMockProjects(db)
+
 	router.HandleFunc("/project", func(w http.ResponseWriter, r *http.Request) {
-		var projects = GetProjects()
+		var projects = GetAllProjects(db)
 
 		json.NewEncoder(w).Encode(projects)
 	})
