@@ -1,0 +1,14 @@
+package component
+
+import (
+    "platformlab/controlpanel/model"
+)
+
+templ ProjectList(projects []model.Project) {
+    <h1>Projects</h1>
+    <ul>
+    for _, project := range projects {
+        <li>{ project.Name }</li>
+    }
+    </ul>
+}

@@ -1,24 +1,20 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"net/http"
+	"platformlab/controlpanel/component"
+	"platformlab/controlpanel/model"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-type Project struct {
-	Acronym string `json:"acronym"`
-	Name    string `json:"name"`
-}
-
 func CreateMockProjects(db *gorm.DB) {
-	db.AutoMigrate(&Project{})
+	db.AutoMigrate(&model.Project{})
 
-	p := []Project{
+	p := []model.Project{
 		{Acronym: "dcc", Name: "DCC"},
 		{Acronym: "dsi", Name: "DSI"},
 		{Acronym: "customer-identity", Name: "Customer Identity"},
@@ -29,8 +25,8 @@ func CreateMockProjects(db *gorm.DB) {
 	}
 }
 
-func GetAllProjects(db *gorm.DB) *[]Project {
-	var projects []Project
+func GetAllProjects(db *gorm.DB) *[]model.Project {
+	var projects []model.Project
 
 	db.Find(&projects)
 
@@ -49,12 +45,12 @@ func main() {
 
 	router.HandleFunc("/project", func(w http.ResponseWriter, r *http.Request) {
 		var projects = GetAllProjects(db)
-
-		json.NewEncoder(w).Encode(projects)
+		component.ProjectList(*projects).Render(context.Background(), w)
 	})
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "hello world\n")
+		component := Hello("platformlab")
+		component.Render(context.Background(), w)
 	})
 
 	http.ListenAndServe(":8080", router)
