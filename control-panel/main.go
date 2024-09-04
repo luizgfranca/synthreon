@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"net/http"
 	"platformlab/controlpanel/component"
 	"platformlab/controlpanel/model"
@@ -10,6 +12,10 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+type ErrorMessage struct {
+	Message string
+}
 
 func CreateMockProjects(db *gorm.DB) {
 	db.AutoMigrate(&model.Project{})
@@ -33,6 +39,33 @@ func GetAllProjects(db *gorm.DB) *[]model.Project {
 	return &projects
 }
 
+func GetDatabaseTables() ([]string, error) {
+	db, err := sql.Open("sqlite3", "test.db")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select name from sqlite_master where type = 'table'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []string{}
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, name)
+	}
+
+	return list, nil
+}
+
 func main() {
 	router := mux.NewRouter()
 
@@ -51,6 +84,14 @@ func main() {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		component := Hello("platformlab")
 		component.Render(context.Background(), w)
+	})
+
+	router.HandleFunc("/table", func(w http.ResponseWriter, r *http.Request) {
+		tables, err := GetDatabaseTables()
+		if err != nil {
+			json.NewEncoder(w).Encode(ErrorMessage{err.Error()})
+		}
+		json.NewEncoder(w).Encode(tables)
 	})
 
 	http.ListenAndServe(":8080", router)
