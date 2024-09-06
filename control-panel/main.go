@@ -17,6 +17,11 @@ type ErrorMessage struct {
 	Message string
 }
 
+type TableColumn struct {
+	Name string
+	Type string
+}
+
 func CreateMockProjects(db *gorm.DB) {
 	db.AutoMigrate(&model.Project{})
 
@@ -40,6 +45,33 @@ func GetAllProjects(db *gorm.DB) *[]model.Project {
 }
 
 func GetDatabaseTables() ([]string, error) {
+	db, err := sql.Open("sqlite3", "test.db")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select name from sqlite_master where type = 'table'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []string{}
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, name)
+	}
+
+	return list, nil
+}
+
+func GetTableColumns(table string) ([]TableColumn, error) {
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
 		return nil, err
