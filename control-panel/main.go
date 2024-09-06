@@ -18,8 +18,17 @@ type ErrorMessage struct {
 }
 
 type TableColumn struct {
-	Name string
-	Type string
+	Id           int
+	Name         string
+	Type         string
+	NotNull      bool
+	DefaultValue string
+	IsPrimaryKey bool
+}
+
+type TableInfo struct {
+	Name       string
+	ColumnInfo []TableColumn
 }
 
 func CreateMockProjects(db *gorm.DB) {
@@ -78,21 +87,43 @@ func GetTableColumns(table string) ([]TableColumn, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("select name from sqlite_master where type = 'table'")
+	rows, err := db.Query("PRAGMA table_info(" + table + ")")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	list := []string{}
+	list := []TableColumn{}
+	var cid int
+	var cname string
+	var ctype string
+	var cnotnull bool
+	var dfltVal sql.NullString
+	var primary bool
+
 	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
+		err = rows.Scan(
+			&cid,
+			&cname,
+			&ctype,
+			&cnotnull,
+			&dfltVal,
+			&primary)
+
 		if err != nil {
 			return nil, err
 		}
 
-		list = append(list, name)
+		column := TableColumn{
+			Id:           cid,
+			Name:         cname,
+			Type:         ctype,
+			NotNull:      cnotnull,
+			DefaultValue: dfltVal.String,
+			IsPrimaryKey: primary,
+		}
+
+		list = append(list, column)
 	}
 
 	return list, nil
@@ -122,8 +153,26 @@ func main() {
 		tables, err := GetDatabaseTables()
 		if err != nil {
 			json.NewEncoder(w).Encode(ErrorMessage{err.Error()})
+			return
 		}
-		json.NewEncoder(w).Encode(tables)
+
+		tableInfoList := []TableInfo{}
+		for _, table := range tables {
+			columns, err := GetTableColumns(table)
+			if err != nil {
+				json.NewEncoder(w).Encode(ErrorMessage{err.Error()})
+				return
+			}
+
+			info := TableInfo{
+				Name:       table,
+				ColumnInfo: columns,
+			}
+
+			tableInfoList = append(tableInfoList, info)
+		}
+
+		json.NewEncoder(w).Encode(tableInfoList)
 	})
 
 	http.ListenAndServe(":8080", router)
