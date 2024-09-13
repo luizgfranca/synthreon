@@ -145,9 +145,12 @@ func main() {
 	})
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		component := Hello("platformlab")
-		component.Render(context.Background(), w)
+		http.Redirect(w, r, "/control-panel", http.StatusFound)
 	})
+
+	router.PathPrefix("/control-panel").Handler(http.StripPrefix("/control-panel", http.FileServer(http.Dir("./web/dist"))))
+	router.PathPrefix("/assets").Handler(http.FileServer(http.Dir("./web/dist")))
+	// router.Handle("/assets", http.FileServer(http.Dir("./web/dist/assets")))
 
 	router.HandleFunc("/table", func(w http.ResponseWriter, r *http.Request) {
 		tables, err := GetDatabaseTables()

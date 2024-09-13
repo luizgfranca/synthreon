@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="flex flex-col h-screen bg-zinc-900 text-zinc-100">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between bg-zinc-800 h-12 px-2">
+        <!-- Logo -->
+        <div class="flex items-center">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="ml-1 text-lg font-semibold">AdminTool</span>
+        </div>
+
+        <!-- Realm Dropdown -->
+        <div class="flex items-center h-full ml-2">
+            <select class="bg-zinc-700 h-full px-2 pr-10 text-sm text-zinc-100 focus:outline-none appearance-none">
+                <option>Realm 1</option>
+                <option>Realm 2</option>
+                <option>Realm 3</option>
+            </select>
+            <i class="fas fa-chevron-down text-zinc-400 -ml-5 text-xs"></i>
+        </div>
+
+        <!-- User and Logout -->
+        <div class="flex items-center">
+            <i class="fas fa-user h-4 w-4 text-zinc-400"></i>
+            <button class="ml-2 px-2 py-1 bg-zinc-700 text-zinc-100">
+                <i class="fas fa-sign-out-alt h-4 w-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <div class="w-48 bg-zinc-800 p-2">
+            <nav>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="flex items-center text-zinc-300 hover:bg-zinc-700 p-1 text-sm">
+                            <i class="fas fa-home h-4 w-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center text-zinc-300 hover:bg-zinc-700 p-1 text-sm">
+                            <i class="fas fa-users h-4 w-4 mr-2"></i>
+                            Users
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center text-zinc-300 hover:bg-zinc-700 p-1 text-sm">
+                            <i class="fas fa-cog h-4 w-4 mr-2"></i>
+                            Settings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center text-zinc-300 hover:bg-zinc-700 p-1 text-sm">
+                            <i class="fas fa-file-alt h-4 w-4 mr-2"></i>
+                            Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 p-4">
+            <h1 class="text-2xl font-bold mb-2">Welcome to the Admin Dashboard</h1>
+            <p class="text-sm text-zinc-400">Select an option from the sidebar to get started.</p>
+        </div>
+    </div>
+</body>
+</html>
