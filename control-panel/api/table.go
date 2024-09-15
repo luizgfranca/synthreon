@@ -16,7 +16,7 @@ func (t *Table) GetTablesMetadata() func(w http.ResponseWriter, r *http.Request)
 	return func(w http.ResponseWriter, r *http.Request) {
 		metadata, err := t.service.GetTablesMetadata()
 		if err != nil {
-			json.NewEncoder(w).Encode(service.ErrorMessage{Message: err.Error()})
+			json.NewEncoder(w).Encode(ErrorMessage{Message: err.Error()})
 		}
 
 		json.NewEncoder(w).Encode(metadata)

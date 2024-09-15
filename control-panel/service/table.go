@@ -2,26 +2,13 @@ package service
 
 import (
 	"database/sql"
+	"platformlab/controlpanel/model"
 
 	"gorm.io/gorm"
 )
 
 type ErrorMessage struct {
 	Message string
-}
-
-type TableColumn struct {
-	Id           int
-	Name         string
-	Type         string
-	NotNull      bool
-	DefaultValue string
-	IsPrimaryKey bool
-}
-
-type TableInfo struct {
-	Name       string
-	ColumnInfo []TableColumn
 }
 
 type Table struct {
@@ -55,7 +42,7 @@ func (*Table) GetDatabaseTables() ([]string, error) {
 	return list, nil
 }
 
-func (*Table) GetTableColumns(table string) ([]TableColumn, error) {
+func (*Table) GetTableColumns(table string) ([]model.TableColumn, error) {
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
 		return nil, err
@@ -68,7 +55,7 @@ func (*Table) GetTableColumns(table string) ([]TableColumn, error) {
 	}
 	defer rows.Close()
 
-	list := []TableColumn{}
+	list := []model.TableColumn{}
 	var cid int
 	var cname string
 	var ctype string
@@ -89,7 +76,7 @@ func (*Table) GetTableColumns(table string) ([]TableColumn, error) {
 			return nil, err
 		}
 
-		column := TableColumn{
+		column := model.TableColumn{
 			Id:           cid,
 			Name:         cname,
 			Type:         ctype,
@@ -104,20 +91,20 @@ func (*Table) GetTableColumns(table string) ([]TableColumn, error) {
 	return list, nil
 }
 
-func (t *Table) GetTablesMetadata() (*[]TableInfo, error) {
+func (t *Table) GetTablesMetadata() (*[]model.TableInfo, error) {
 	tables, err := t.GetDatabaseTables()
 	if err != nil {
 		return nil, err
 	}
 
-	tableInfoList := []TableInfo{}
+	tableInfoList := []model.TableInfo{}
 	for _, table := range tables {
 		columns, err := t.GetTableColumns(table)
 		if err != nil {
 			return nil, err
 		}
 
-		info := TableInfo{
+		info := model.TableInfo{
 			Name:       table,
 			ColumnInfo: columns,
 		}
