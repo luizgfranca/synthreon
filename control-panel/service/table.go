@@ -2,8 +2,8 @@ package service
 
 import (
 	"database/sql"
-	"encoding/json"
-	"net/http"
+
+	"gorm.io/gorm"
 )
 
 type ErrorMessage struct {
@@ -24,7 +24,9 @@ type TableInfo struct {
 	ColumnInfo []TableColumn
 }
 
-type Table struct{}
+type Table struct {
+	Db *gorm.DB
+}
 
 func (*Table) GetDatabaseTables() ([]string, error) {
 	db, err := sql.Open("sqlite3", "test.db")
@@ -102,30 +104,26 @@ func (*Table) GetTableColumns(table string) ([]TableColumn, error) {
 	return list, nil
 }
 
-func (t *Table) GetTablesMetadata() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		tables, err := t.GetDatabaseTables()
-		if err != nil {
-			json.NewEncoder(w).Encode(ErrorMessage{err.Error()})
-			return
-		}
-
-		tableInfoList := []TableInfo{}
-		for _, table := range tables {
-			columns, err := t.GetTableColumns(table)
-			if err != nil {
-				json.NewEncoder(w).Encode(ErrorMessage{err.Error()})
-				return
-			}
-
-			info := TableInfo{
-				Name:       table,
-				ColumnInfo: columns,
-			}
-
-			tableInfoList = append(tableInfoList, info)
-		}
-
-		json.NewEncoder(w).Encode(tableInfoList)
+func (t *Table) GetTablesMetadata() (*[]TableInfo, error) {
+	tables, err := t.GetDatabaseTables()
+	if err != nil {
+		return nil, err
 	}
+
+	tableInfoList := []TableInfo{}
+	for _, table := range tables {
+		columns, err := t.GetTableColumns(table)
+		if err != nil {
+			return nil, err
+		}
+
+		info := TableInfo{
+			Name:       table,
+			ColumnInfo: columns,
+		}
+
+		tableInfoList = append(tableInfoList, info)
+	}
+
+	return &tableInfoList, nil
 }

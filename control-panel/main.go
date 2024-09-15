@@ -2,8 +2,8 @@ package main
 
 import (
 	"net/http"
+	"platformlab/controlpanel/api"
 	"platformlab/controlpanel/model"
-	"platformlab/controlpanel/service"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -34,8 +34,8 @@ func main() {
 
 	CreateMockProjects(db)
 
-	projectService := service.Project{Db: db}
-	tableService := service.Table{}
+	projectService := api.ProjectRESTApi(db)
+	tableService := api.Table{}
 
 	router.HandleFunc("/project", projectService.GetAllProjects())
 
