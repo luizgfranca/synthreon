@@ -14,13 +14,13 @@ func CreateMockProjects(db *gorm.DB) {
 	db.AutoMigrate(&model.Project{})
 
 	p := []model.Project{
-		{Acronym: "dcc", Name: "DCC"},
-		{Acronym: "dsi", Name: "DSI"},
-		{Acronym: "customer-identity", Name: "Customer Identity"},
+		{Acronym: "proja", Name: "ProjA", Description: "This is the A mock project"},
+		{Acronym: "proj-b", Name: "Project B", Description: "This is another example project"},
+		{Acronym: "proj-c", Name: "PROJECT C", Description: "This is the C mock project, used to have a basic notion of how this will work and look"},
 	}
 
 	for _, it := range p {
-		db.Create(it)
+		db.Create(&it)
 	}
 }
 
@@ -32,7 +32,9 @@ func main() {
 		panic("failed connecting to database")
 	}
 
+	println("creating mock projects")
 	CreateMockProjects(db)
+	println("done")
 
 	projectAPI := api.ProjectRESTApi(db)
 	tableAPI := api.Table{}
@@ -50,5 +52,6 @@ func main() {
 
 	router.HandleFunc("/table", tableAPI.GetTablesMetadata())
 
+	println("listening at :8080")
 	http.ListenAndServe(":8080", router)
 }
