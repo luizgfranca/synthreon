@@ -7,10 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ErrorMessage struct {
-	Message string
-}
-
 type Table struct {
 	Db *gorm.DB
 }

@@ -34,10 +34,11 @@ func main() {
 
 	CreateMockProjects(db)
 
-	projectService := api.ProjectRESTApi(db)
-	tableService := api.Table{}
+	projectAPI := api.ProjectRESTApi(db)
+	tableAPI := api.Table{}
 
-	router.HandleFunc("/project", projectService.GetAllProjects())
+	router.HandleFunc("/project", projectAPI.GetAllProjects()).Methods("GET")
+	router.HandleFunc("/project", projectAPI.CreateProject()).Methods("POST")
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/control-panel", http.StatusFound)
@@ -47,7 +48,7 @@ func main() {
 	router.PathPrefix("/assets").Handler(http.FileServer(http.Dir("./web/dist")))
 	// router.Handle("/assets", http.FileServer(http.Dir("./web/dist/assets")))
 
-	router.HandleFunc("/table", tableService.GetTablesMetadata())
+	router.HandleFunc("/table", tableAPI.GetTablesMetadata())
 
 	http.ListenAndServe(":8080", router)
 }
