@@ -1,9 +1,9 @@
+import { RouterProvider } from "react-router-dom";
 import "./index.css";
-import { ProjectSelector } from "./page/projectSelector.";
-
+import { router } from "./router";
 
 function App() {
-  return (<ProjectSelector/>)
+  return <RouterProvider router={router} />;
 }
 
 export default App;
