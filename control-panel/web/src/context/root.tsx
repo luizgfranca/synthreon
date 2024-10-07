@@ -1,57 +1,25 @@
-import ProjectService, { ProjectDto } from "@/service/project.service";
-import { ReactNode, createContext, useContext, useState } from "react";
+import { OnlyChildrenProps } from "@/lib/only-children-props";
+import { ProjectDto } from "@/service/project.service";
+import { createContext, useContext } from "react";
+import { projectResource } from "./resources";
 
-interface ContextProviderProps {
-  children: ReactNode;
-}
 export interface State {
-  // getProjects: () => ProjectDto[]
-}
-
-type Query<T> = {
-  status: 'pending' | 'success' | 'error',
-  data?: T | Promise<T>
+  getProjects: () => ProjectDto[];
 }
 
 const RootContext = createContext<State | null>(null);
 
-export function ContextProvider(props: ContextProviderProps) {
-  const [projects, setProjects] = useState<Query<ProjectDto[]>>()
-
-  // const getProjects = (): ProjectDto[] => {
-  //   if (!projects) {
-  //     const promise = ProjectService.queryProjects()
-  //     setProjects({status: 'pending', data: promise});
-      
-  //     promise.then(projects => {
-  //       console.debug('setProjects', {status: 'success', data: projects})
-  //       setProjects({status: 'success', data: projects})
-  //       return projects
-  //     })
-  //     .catch(() => {
-  //       setProjects({status: 'error', data: []})
-  //       return []
-  //     });
-
-  //     throw promise
-  //   }
-
-    // switch (projects.status) {
-    //   case 'pending':
-    //   case 'error':
-    //     console.debug('pending/error')
-    //     throw projects.data
-      
-    //   case 'success':
-    //     console.debug('success')
-    //     return projects.data as ProjectDto[]
-    // }
-  // }
-
+export function ContextProvider(props: OnlyChildrenProps) {
   return (
-    <RootContext.Provider value={{
-      
-    }}>{props.children}</RootContext.Provider>
+    <RootContext.Provider
+      value={{
+        getProjects() {
+          return projectResource.read() as ProjectDto[];
+        },
+      }}
+    >
+      {props.children}
+    </RootContext.Provider>
   );
 }
 
