@@ -58,8 +58,8 @@ func main() {
 
 	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
 
-	router.HandleFunc("/project", projectAPI.GetAllProjects()).Methods("GET")
-	router.HandleFunc("/project", projectAPI.CreateProject()).Methods("POST")
+	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
+	router.HandleFunc("/api/project", projectAPI.CreateProject()).Methods("POST")
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/control-panel", http.StatusFound)
@@ -69,7 +69,7 @@ func main() {
 	router.PathPrefix("/assets").Handler(http.FileServer(http.Dir("./web/dist")))
 	// router.Handle("/assets", http.FileServer(http.Dir("./web/dist/assets")))
 
-	router.HandleFunc("/table", tableAPI.GetTablesMetadata())
+	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
 
 	println("listening at :8080")
 	http.ListenAndServe(":8080", corsMiddleware(router))

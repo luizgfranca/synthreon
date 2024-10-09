@@ -11,6 +11,7 @@ export function ProjectList() {
         <OverviewSelectionOption
           title={project.name}
           description={project.description}
+          acronym={project.acronym}
         />
       ))}
 

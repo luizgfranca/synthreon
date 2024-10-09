@@ -10,7 +10,7 @@ export type QueryProjecstDto = ProjectDto[]
 const BASE_URL = import.meta.env.PL_BACKEND_URL
 
 const queryProjects = new Promise((resolve) => {
-     fetch(`${BASE_URL}/project`)
+     fetch(`${BASE_URL}/api/project`)
         .then(response => response.json())
         .then(data => resolve(data as ProjectDto[]))
         .catch(e => {
