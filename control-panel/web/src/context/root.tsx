@@ -1,7 +1,7 @@
+import { ProjectDatasource } from "@/datasource/project.datasource";
 import { OnlyChildrenProps } from "@/lib/only-children-props";
 import { ProjectDto } from "@/service/project.service";
 import { createContext, useContext } from "react";
-import { projectResource } from "./resources";
 
 export interface State {
   getProjects: () => ProjectDto[];
@@ -9,12 +9,14 @@ export interface State {
 
 const RootContext = createContext<State | null>(null);
 
+const projectsDatasource = new ProjectDatasource();
+
 export function ContextProvider(props: OnlyChildrenProps) {
   return (
     <RootContext.Provider
       value={{
         getProjects() {
-          return projectResource.read() as ProjectDto[];
+          return projectsDatasource.get();
         },
       }}
     >
