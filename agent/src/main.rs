@@ -7,5 +7,5 @@ mod heartbeat;
 
 
 fn main() {
-    application::serve_application("127.0.0.1:25250");
+    application::serve_application("0.0.0.0:25250");
 }
