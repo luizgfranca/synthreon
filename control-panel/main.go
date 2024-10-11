@@ -58,12 +58,14 @@ func main() {
 	println("done")
 
 	projectAPI := api.ProjectRESTApi(db)
+	toolAPI := api.ToolRestAPI(db)
 	tableAPI := api.Table{}
 
 	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
 	router.HandleFunc("/api/project", projectAPI.CreateProject()).Methods("POST")
 	router.HandleFunc("/api/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")
 	router.HandleFunc("/api/project/{project}/tool", projectAPI.CreateToolForProject()).Methods("POST")
+	router.HandleFunc("/api/tool/event", toolAPI.GetEventRresponseTEST()).Methods("POST")
 	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

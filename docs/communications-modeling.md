@@ -19,11 +19,11 @@ server to client
     "tool": "tool-y",
     "display": {
         "type": "prompt",
-        "data":[
+        "elements":[
             {
-            "type": "input",
-            "label": "This is a test",
-            "name": "generated"
+                "type": "input",
+                "label": "This is a test",
+                "name": "generated"
             }
         ]
     }
@@ -57,10 +57,33 @@ server to client
     "tool": "tool-y",
     "display": {
         "type": "result",
-        "data": {
+        "result": {
             "success": true,
             "message": "Hello user input",
         }
+    }
+}
+```
+
+
+
+### ALTERATIVE RESPONSE OPTION
+
+server to client
+```json
+{
+    "class": "operation",
+    "type": "display",
+    "project": "proj-x",
+    "tool": "tool-y",
+    "display": {
+        "type": "view",
+        "elements":[
+            {
+                "type": "text",
+                "message": "hello world"
+            }
+        ]
     }
 }
 ```
