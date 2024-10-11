@@ -5,6 +5,8 @@ type Project struct {
 	Acronym     string `json:"acronym"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+
+	Tools []Tool
 }
 
 func (p *Project) IsValid() bool {

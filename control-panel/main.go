@@ -11,9 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateMockProjects(db *gorm.DB) {
+func DoMigrations(db *gorm.DB) {
 	db.AutoMigrate(&model.Project{})
+	db.AutoMigrate(&model.Tool{})
+}
 
+func CreateMockProjects(db *gorm.DB) {
 	p := []model.Project{
 		{Acronym: "proja", Name: "ProjA", Description: "This is the A mock project"},
 		{Acronym: "proj-b", Name: "Project B", Description: "This is another example project"},
@@ -29,13 +32,10 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Executing middleware", r.Method)
 
-		// if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
 		w.Header().Set("Content-Type", "application/json")
-		// return
-		// }
 
 		next.ServeHTTP(w, r)
 	})
@@ -49,6 +49,10 @@ func main() {
 		panic("failed connecting to database")
 	}
 
+	println("doing database migrations")
+	DoMigrations(db)
+	println("done")
+
 	println("creating mock projects")
 	CreateMockProjects(db)
 	println("done")
@@ -56,10 +60,11 @@ func main() {
 	projectAPI := api.ProjectRESTApi(db)
 	tableAPI := api.Table{}
 
-	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
-
 	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
 	router.HandleFunc("/api/project", projectAPI.CreateProject()).Methods("POST")
+	router.HandleFunc("/api/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")
+	router.HandleFunc("/api/project/{project}/tool", projectAPI.CreateToolForProject()).Methods("POST")
+	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/control-panel", http.StatusFound)
@@ -67,9 +72,6 @@ func main() {
 
 	router.PathPrefix("/control-panel").Handler(http.StripPrefix("/control-panel", http.FileServer(http.Dir("./web/dist"))))
 	router.PathPrefix("/assets").Handler(http.FileServer(http.Dir("./web/dist")))
-	// router.Handle("/assets", http.FileServer(http.Dir("./web/dist/assets")))
-
-	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
 
 	println("listening at :8080")
 	http.ListenAndServe(":8080", corsMiddleware(router))

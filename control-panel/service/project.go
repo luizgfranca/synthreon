@@ -22,12 +22,24 @@ func (p *Project) FindAll() *[]model.Project {
 	return &projects
 }
 
+func (p *Project) FindByAcronym(acronym string) (*model.Project, error) {
+	var maybeProject *model.Project
+
+	result := p.Db.Where("acronym = ?", acronym).First(&maybeProject)
+	if result.Error != nil {
+		return nil, &model.GenericLogicError{
+			Message: fmt.Sprintf("element with acronym %s not found", acronym),
+		}
+	}
+
+	return maybeProject, nil
+}
+
 func (p *Project) Create(project *model.Project) (*model.Project, error) {
 	var result *gorm.DB
-	var maybeExisting *model.Project
 
-	result = p.Db.Where("acronym = ?", project.Acronym).First(&maybeExisting)
-	if result.Error == nil {
+	_, err := p.FindByAcronym(project.Acronym)
+	if err == nil {
 		return nil, &model.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", project.Acronym),
 		}
