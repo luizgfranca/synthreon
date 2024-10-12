@@ -24,9 +24,11 @@ const (
 )
 
 type DisplayElement struct {
-	Type  string `json:"type"`
-	Label string `json:"label"`
-	Name  string `json:"name"`
+	Type        string `json:"type"`
+	Label       string `json:"label"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+	Name        string `json:"name"`
 }
 
 type DisplayResult struct {

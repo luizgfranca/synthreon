@@ -26,7 +26,20 @@ func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		json.NewEncoder(w).Encode(input)
+		helloWorldMock := model.ToolEvent{
+			Class:   model.EventClassOperation,
+			Type:    model.EventTypeDisplay,
+			Project: "x",
+			Tool:    "y",
+			Display: &model.DisplayDefniition{
+				Type: model.DisplayDefniitionTypeView,
+				Elements: &[]model.DisplayElement{
+					{Type: "heading", Text: "Hello world", Description: "This is a hello world test"},
+				},
+			},
+		}
+
+		json.NewEncoder(w).Encode(helloWorldMock)
 	}
 }
 
