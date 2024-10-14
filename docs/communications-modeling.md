@@ -50,19 +50,19 @@ client to server
 
 server to client
 ```json
-{
-    "class": "operation",
-    "type": "display",
-    "project": "proj-x",
-    "tool": "tool-y",
-    "display": {
-        "type": "result",
-        "result": {
-            "success": true,
-            "message": "Hello user input",
+    {
+        "class": "operation",
+        "type": "display",
+        "project": "proj-x",
+        "tool": "tool-y",
+        "display": {
+            "type": "result",
+            "result": {
+                "success": true,
+                "message": "Hello user input",
+            }
         }
     }
-}
 ```
 
 

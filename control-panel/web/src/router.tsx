@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { ProjectSelector } from "./page/projectSelector.page";
 import { ProjectOverviewPage } from "./page/projectOverview.page";
+import { ToolViewExperimentsPage } from "./page/toolViewExperiments.page";
 
 const router = createBrowserRouter([
   {
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
   {
     path: '/project/*',
     element: <ProjectOverviewPage />,
+  },
+  {
+    path: '/exp',
+    element: <ToolViewExperimentsPage />
   }
 ]);
 

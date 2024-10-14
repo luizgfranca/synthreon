@@ -32,7 +32,7 @@ type DisplayElement struct {
 }
 
 type DisplayResult struct {
-	Success string `json:"type"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
