@@ -46,11 +46,20 @@ func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// simple echo
-// after this i should return a mock of an event
 func connectionHandler(connection *websocket.Conn) {
 	defer connection.Close()
 	var event model.ToolEvent
+
+	mockResultEvent := model.ToolEvent{
+		Class:   model.EventClassOperation,
+		Type:    model.EventTypeDisplay,
+		Project: "x",
+		Tool:    "y",
+		Display: &model.DisplayDefniition{
+			Type:   model.DisplayDefniitionTypeResult,
+			Result: &model.DisplayResult{Success: true, Message: "A"},
+		},
+	}
 
 	for {
 		msgtype, message, err := connection.ReadMessage()
@@ -67,7 +76,14 @@ func connectionHandler(connection *websocket.Conn) {
 
 		log.Print("EVENT: class ", event.Class)
 
-		err = connection.WriteMessage(msgtype, message)
+		mockResultEvent.Display.Result.Message += "A"
+
+		data, err := json.Marshal(mockResultEvent)
+		if err != nil {
+			log.Print("error encoding response: ", err.Error())
+		}
+
+		err = connection.WriteMessage(msgtype, data)
 		if err != nil {
 			log.Print("websocket message sending error: ", err.Error())
 			break

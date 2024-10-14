@@ -16,39 +16,17 @@ type DisplayResult = {
 
 type DisplayDefinitionType = 'result' | 'view' | 'prompt' | string
 
-type DisplayDefinition = {
+export type DisplayDefinition = {
     type: DisplayDefinitionType;
     elements?: DisplayElement[];
     result?: DisplayResult;
 };
 
-type DsiplayRendererProps = {
+export type DsiplayRendererProps = {
     definition: DisplayDefinition
 }
 
 export function DisplayRenderer(props: DsiplayRendererProps) {
-    const socket = useMemo(() => {
-        const s = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/ws`)
-        s.addEventListener('open', () => {
-            console.log('socket open')
-            setInterval(() => {
-                s.send(JSON.stringify({
-                    "class": "interaction",
-                    "type": "open",
-                    "project": "proj-x",
-                    "tool": "tool-y",
-                }))
-                console.log('sent')
-            }, 1000)
-        })
-
-        s.addEventListener('message', (e) => {
-            console.log(`recv: ${e.data}`)
-        })
-
-        return s    
-    }, [])
-
     return (
         <Result success={props.definition.result?.success ?? false}>{props.definition.result?.message ?? ''}</Result>
     )
