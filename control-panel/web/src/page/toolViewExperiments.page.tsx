@@ -27,7 +27,7 @@ export function ToolViewExperimentsPage() {
     const [event, setEvent] = useState<ToolEvent | null>(null)
     
     useMemo(() => {
-        const s = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/ws`)
+        const s = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`)
         s.addEventListener('open', () => {
             console.log('socket open')
             setInterval(() => {

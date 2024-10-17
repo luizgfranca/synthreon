@@ -66,7 +66,7 @@ func main() {
 	router.HandleFunc("/api/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")
 	router.HandleFunc("/api/project/{project}/tool", projectAPI.CreateToolForProject()).Methods("POST")
 	router.HandleFunc("/api/tool/event", toolAPI.GetEventRresponseTEST()).Methods("POST")
-	router.HandleFunc("/api/tool/ws", toolAPI.ToolClientWebsocket()).Methods("GET")
+	router.HandleFunc("/api/tool/client/ws", toolAPI.ToolClientWebsocket()).Methods("GET")
 	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

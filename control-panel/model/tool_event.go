@@ -3,16 +3,24 @@ package model
 type EventClass string
 
 const (
-	EventClassOperation   EventClass = "operation"
-	EventClassInteraction EventClass = "interaction"
+	EventClassOperation    EventClass = "operation"
+	EventClassInteraction  EventClass = "interaction"
+	EventClassAnnouncement EventClass = "announcement"
 )
 
 type EventType string
 
 const (
+	// only used when eventClass=operation
 	EventTypeDisplay EventType = "display"
 	EventTypeInput   EventType = "input"
-	EventTypeOpen    EventType = "open"
+
+	// only used when eventClass=interaction
+	EventTypeOpen EventType = "open"
+
+	// only used when eventClass=announcement
+	EventTypeProvider EventType = "provider"
+	EventTypeAck      EventType = "ack"
 )
 
 type DisplayDefniitionType string
@@ -68,17 +76,46 @@ type ToolEvent struct {
 }
 
 func (e *ToolEvent) IsValid() bool {
+
+	// validation of required fields
+
 	if e.Class == "" || e.Type == "" || e.Project == "" || e.Tool == "" {
 		return false
 	}
 
-	if e.Class != EventClassInteraction && e.Class != EventClassOperation {
+	// validation of all possible event classes
+
+	if e.Class != EventClassInteraction && e.Class != EventClassOperation && e.Class != EventClassAnnouncement {
 		return false
 	}
 
-	if e.Type != EventTypeInput && e.Type != EventTypeDisplay && e.Type != EventTypeOpen {
+	// validation of all possible types
+
+	if e.Type != EventTypeInput &&
+		e.Type != EventTypeDisplay &&
+		e.Type != EventTypeOpen &&
+		e.Type != EventTypeProvider &&
+		e.Type != EventTypeAck {
 		return false
 	}
+
+	// validation of class/type possible combinations
+
+	if e.Class == EventClassOperation &&
+		(e.Type != EventTypeDisplay && e.Type != EventTypeInput) {
+		return false
+	}
+
+	if e.Class == EventClassInteraction && e.Type != EventTypeOpen {
+		return false
+	}
+
+	if e.Class == EventClassAnnouncement &&
+		(e.Type != EventTypeProvider && e.Type != EventTypeAck) {
+		return false
+	}
+
+	// validation of field configuration when specific class/type fields are needed
 
 	if e.Class == EventClassOperation && e.Type == EventTypeDisplay {
 		if e.Display == nil {
@@ -103,4 +140,18 @@ func (e *ToolEvent) IsValid() bool {
 	}
 
 	return true
+}
+
+// EXPECTATION: the event sent to this function should be an announcement
+func NewAnnouncementAckEvent(announcement *ToolEvent) *ToolEvent {
+	if announcement.Class != EventClassAnnouncement {
+		panic("expected Announcement event in NewAnnouncementAckEvent() but received another Class: " + announcement.Class)
+	}
+
+	return &ToolEvent{
+		Class:   EventClassAnnouncement,
+		Type:    EventTypeAck,
+		Project: announcement.Project,
+		Tool:    announcement.Tool,
+	}
 }

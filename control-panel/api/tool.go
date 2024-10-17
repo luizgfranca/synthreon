@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"platformlab/controlpanel/api/connectionmgr"
 	"platformlab/controlpanel/model"
 
 	"github.com/gorilla/websocket"
@@ -12,6 +13,8 @@ import (
 
 type Tool struct {
 	websocketUpgrader websocket.Upgrader
+
+	providerMgr *connectionmgr.Provider
 }
 
 func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +49,7 @@ func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func connectionHandler(connection *websocket.Conn) {
+func clientConnectionHandler(connection *websocket.Conn) {
 	defer connection.Close()
 	var event model.ToolEvent
 
@@ -64,31 +67,35 @@ func connectionHandler(connection *websocket.Conn) {
 	for {
 		msgtype, message, err := connection.ReadMessage()
 		if err != nil {
-			log.Print("websocket message receiving error: ", err.Error())
+			log.Print("[toolclient] websocket message receiving error: ", err.Error())
 			break
 		}
 
 		err = json.Unmarshal(message, &event)
 		if err != nil {
-			log.Print("websocket message payload parsing error: ", err.Error())
+			log.Print("[toolclient] websocket message payload parsing error: ", err.Error())
 			break
 		}
 
-		log.Print("EVENT: class ", event.Class)
+		log.Print("[toolclient] EVENT: class ", event.Class)
 
 		mockResultEvent.Display.Result.Message += "A"
 
 		data, err := json.Marshal(mockResultEvent)
 		if err != nil {
-			log.Print("error encoding response: ", err.Error())
+			log.Print("[toolclient] error encoding response: ", err.Error())
 		}
 
 		err = connection.WriteMessage(msgtype, data)
 		if err != nil {
-			log.Print("websocket message sending error: ", err.Error())
+			log.Print("[toolclient] websocket message sending error: ", err.Error())
 			break
 		}
 	}
+}
+
+func providerConnectionHandler(connection *websocket.Conn) {
+	connectionmgr.NewProviderConnectionMgr(connection)
 }
 
 func upgraderAllowAllOrigins(r *http.Request) bool {
@@ -105,12 +112,24 @@ func (t *Tool) ToolClientWebsocket() func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		go connectionHandler(connection)
+		go clientConnectionHandler(connection)
+	}
+}
+
+func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		connection, err := t.websocketUpgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Print("websocket upgrade error: ", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: err.Error()})
+			return
+		}
+
+		go providerConnectionHandler(connection)
 	}
 }
 
 func ToolRestAPI(db *gorm.DB) *Tool {
-	return &Tool{websocket.Upgrader{
-		CheckOrigin: upgraderAllowAllOrigins,
-	}}
+	return &Tool{websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins}, nil}
 }

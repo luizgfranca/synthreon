@@ -87,3 +87,29 @@ server to client
     }
 }
 ```
+
+
+#### PROVIDER
+
+self announcement
+provider to server
+```json
+{
+    "class": "announcement",
+    "type": "provider",
+    "project": "proj-x",
+    "tool": "tool-y"
+}
+```
+
+server to provider
+```json
+{
+    "class": "announcement",
+    "type": "ack",
+    "project": "proj-x",
+    "tool": "tool-y",
+}
+```
+
+in the future i should have an announcementId in the announcement to be acknowleged in the ack
