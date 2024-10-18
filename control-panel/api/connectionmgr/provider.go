@@ -9,16 +9,17 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Provider struct {
+type ProviderMgr struct {
 	connection           *websocket.Conn
 	chSend               chan []byte
 	chRecv               chan string
 	done                 chan bool
 	activeHandlerThreads sync.WaitGroup
+	ClientMgr            *ClientMgr
 }
 
-func NewProviderConnectionMgr(connection *websocket.Conn) *Provider {
-	provider := Provider{
+func NewProviderConnectionMgr(connection *websocket.Conn) *ProviderMgr {
+	provider := ProviderMgr{
 		connection:           connection,
 		chSend:               make(chan []byte),
 		chRecv:               make(chan string),
@@ -34,7 +35,7 @@ func NewProviderConnectionMgr(connection *websocket.Conn) *Provider {
 	return &provider
 }
 
-func (p *Provider) SendEvent(event *model.ToolEvent) {
+func (p *ProviderMgr) SendEvent(event *model.ToolEvent) {
 	data, err := json.Marshal(event)
 	if err != nil {
 		log.Print("[toolprovider] error encoding response: ", err.Error())
@@ -43,15 +44,14 @@ func (p *Provider) SendEvent(event *model.ToolEvent) {
 	p.chSend <- data
 }
 
-func (p *Provider) Close() {
+func (p *ProviderMgr) Close() {
 	p.done <- false
 	p.activeHandlerThreads.Wait()
 
 	p.connection.Close()
 }
 
-func (p *Provider) providerMessageReceiver() {
-	defer p.connection.Close()
+func (p *ProviderMgr) providerMessageReceiver() {
 	var event model.ToolEvent
 
 	for {
@@ -94,10 +94,20 @@ func (p *Provider) providerMessageReceiver() {
 				break
 			}
 		}
+
+		if event.Client == nil {
+			log.Print("[toolprovider] no specified client to forward event")
+			break
+		}
+
+		log.Print("[toolprovider] forwarding event to client: ", event.Client)
+		p.ClientMgr.SendEvent(*event.Client, &event)
 	}
+
+	p.activeHandlerThreads.Done()
 }
 
-func (p *Provider) providerMessageSender() {
+func (p *ProviderMgr) providerMessageSender() {
 	select {
 	case <-p.done:
 		return
@@ -108,4 +118,6 @@ func (p *Provider) providerMessageSender() {
 			break
 		}
 	}
+
+	p.activeHandlerThreads.Done()
 }

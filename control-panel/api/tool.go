@@ -14,7 +14,8 @@ import (
 type Tool struct {
 	websocketUpgrader websocket.Upgrader
 
-	providerMgr *connectionmgr.Provider
+	providerMgr *connectionmgr.ProviderMgr
+	clientMgr   *connectionmgr.ClientMgr
 }
 
 func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Request) {
@@ -49,53 +50,13 @@ func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func clientConnectionHandler(connection *websocket.Conn) {
-	defer connection.Close()
-	var event model.ToolEvent
-
-	mockResultEvent := model.ToolEvent{
-		Class:   model.EventClassOperation,
-		Type:    model.EventTypeDisplay,
-		Project: "x",
-		Tool:    "y",
-		Display: &model.DisplayDefniition{
-			Type:   model.DisplayDefniitionTypeResult,
-			Result: &model.DisplayResult{Success: true, Message: "A"},
-		},
-	}
-
-	for {
-		msgtype, message, err := connection.ReadMessage()
-		if err != nil {
-			log.Print("[toolclient] websocket message receiving error: ", err.Error())
-			break
-		}
-
-		err = json.Unmarshal(message, &event)
-		if err != nil {
-			log.Print("[toolclient] websocket message payload parsing error: ", err.Error())
-			break
-		}
-
-		log.Print("[toolclient] EVENT: class ", event.Class)
-
-		mockResultEvent.Display.Result.Message += "A"
-
-		data, err := json.Marshal(mockResultEvent)
-		if err != nil {
-			log.Print("[toolclient] error encoding response: ", err.Error())
-		}
-
-		err = connection.WriteMessage(msgtype, data)
-		if err != nil {
-			log.Print("[toolclient] websocket message sending error: ", err.Error())
-			break
-		}
-	}
+func (t *Tool) clientConnectionHandler(connection *websocket.Conn) {
+	log.Print("[tool] new client connection")
+	t.clientMgr.NewClient(connection)
 }
 
-func providerConnectionHandler(connection *websocket.Conn) {
-	connectionmgr.NewProviderConnectionMgr(connection)
+func (t *Tool) providerConnectionHandler(connection *websocket.Conn) {
+	t.providerMgr = connectionmgr.NewProviderConnectionMgr(connection)
 }
 
 func upgraderAllowAllOrigins(r *http.Request) bool {
@@ -112,7 +73,7 @@ func (t *Tool) ToolClientWebsocket() func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		go clientConnectionHandler(connection)
+		go t.clientConnectionHandler(connection)
 	}
 }
 
@@ -126,10 +87,10 @@ func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		go providerConnectionHandler(connection)
+		go t.providerConnectionHandler(connection)
 	}
 }
 
 func ToolRestAPI(db *gorm.DB) *Tool {
-	return &Tool{websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins}, nil}
+	return &Tool{websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins}, nil, &connectionmgr.ClientMgr{}}
 }

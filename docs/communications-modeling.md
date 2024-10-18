@@ -89,7 +89,7 @@ server to client
 ```
 
 
-#### PROVIDER
+### PROVIDER
 
 self announcement
 provider to server
@@ -98,7 +98,8 @@ provider to server
     "class": "announcement",
     "type": "provider",
     "project": "proj-x",
-    "tool": "tool-y"
+    "tool": "tool-y",
+    "provider": 1
 }
 ```
 
@@ -109,7 +110,28 @@ server to provider
     "type": "ack",
     "project": "proj-x",
     "tool": "tool-y",
-}
+    "provider": 1
 ```
 
 in the future i should have an announcementId in the announcement to be acknowleged in the ack
+
+provider to server
+```json
+    {
+        "class": "operation",
+        "type": "display",
+        "project": "proj-x",
+        "tool": "tool-y",
+        "display": {
+            "type": "result",
+            "result": {
+                "success": true,
+                "message": "Hello user input",
+            }
+        },
+        "client": 1
+    }
+```
+
+**Every time a client sends a message to a provider, the backend should resolve the provider for that tool, and also complement the event with the client's id for the provider to be able to know to which client it should respond to**
+(there's a security problem with this implementation, in which a rogue provider would send a message to another client, i should think in a solution for this)

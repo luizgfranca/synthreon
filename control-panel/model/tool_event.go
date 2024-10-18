@@ -68,6 +68,9 @@ type ToolEvent struct {
 	Project string     `json:"project"`
 	Tool    string     `json:"tool"`
 
+	// only for internal use, when the message is passed to the provider
+	Client *uint `json:"client"`
+
 	// should be present if type=operation and type=display
 	Display *DisplayDefniition `json:"display"`
 
