@@ -15,7 +15,7 @@ ws.on('open', () => {
 })
 
 ws.on('message', (e) => {
-    console.log('event', e)
+    console.log('event', e.toString())
 })
 
 ws.on('error', (error) => {

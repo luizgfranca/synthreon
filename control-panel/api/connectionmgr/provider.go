@@ -93,6 +93,9 @@ func (p *ProviderMgr) providerMessageReceiver() {
 				log.Print("[toolprovider] websocket message sending error: ", err.Error())
 				break
 			}
+
+			log.Print("[toolprovider] new provider registration acknowleged")
+			return
 		}
 
 		if event.Client == nil {
