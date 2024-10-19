@@ -25,28 +25,28 @@ type ToolEvent = {
 
 export function ToolViewExperimentsPage() {
     const [event, setEvent] = useState<ToolEvent | null>(null)
+
+    console.log('e', event)
     
     useMemo(() => {
-        const s = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`)
-        s.addEventListener('open', () => {
+        const ws = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`)
+        ws.addEventListener('open', () => {
             console.log('socket open')
-            setInterval(() => {
-                s.send(JSON.stringify({
-                    "class": "interaction",
-                    "type": "open",
-                    "project": "proj-x",
-                    "tool": "tool-y",
-                }))
-                console.log('sent')
-            }, 1000)
+
+            ws.send(JSON.stringify({
+                "class": "interaction",
+                "type": "open",
+                "project": "proj-x",
+                "tool": "tool-b",
+            }))
         })
 
-        s.addEventListener('message', (e) => {
+        ws.addEventListener('message', (e) => {
             console.log(`recv: ${e.data}`)
             setEvent(JSON.parse(e.data))
         })
 
-        return s
+        return ws
     }, [])
     
     if(!event) {
@@ -58,9 +58,6 @@ export function ToolViewExperimentsPage() {
             </div>
         )       
     }
-
-    console.log('e', event)
-
     return (
         <div className="bg-zinc-900 text-zinc-100 h-screen">
             <div className="container mx-auto px-4 py-8">

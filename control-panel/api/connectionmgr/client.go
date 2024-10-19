@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"platformlab/controlpanel/model"
+	"strconv"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
 
 type ToolClient struct {
-	id                   uint
+	id                   string
 	connection           *websocket.Conn
 	chSend               chan []byte
 	done                 chan bool
@@ -19,23 +20,24 @@ type ToolClient struct {
 }
 
 type ClientMgr struct {
-	clients             []ToolClient
+	clients             []*ToolClient
 	ProviderMgr         *ProviderMgr
 	clientAdditionMutex sync.Mutex
 }
 
-func (m *ClientMgr) NewClient(connection *websocket.Conn) uint {
+func (m *ClientMgr) NewClient(connection *websocket.Conn) string {
 	m.clientAdditionMutex.Lock()
-	idx := uint(len(m.clients))
-	m.clients[idx] = *NewToolClient(m, idx, connection)
+	idx := strconv.Itoa(len(m.clients))
+	m.clients = append(m.clients, NewToolClient(m, idx, connection))
 	m.clientAdditionMutex.Unlock()
-	log.Print("Registered new client with ID: ", idx)
+	log.Print("[ToolClient] Registered new client with ID: ", idx)
 
 	return idx
 }
 
 func (m *ClientMgr) SendEvent(client uint, e *model.ToolEvent) error {
 	m.clientAdditionMutex.Lock()
+	log.Print("[ToolClient] clents: ", m.clients)
 	if len(m.clients) <= int(client) {
 		m.clientAdditionMutex.Unlock()
 		return &model.GenericLogicError{Message: "client not found"}
@@ -46,7 +48,7 @@ func (m *ClientMgr) SendEvent(client uint, e *model.ToolEvent) error {
 	return nil
 }
 
-func NewToolClient(manager *ClientMgr, id uint, connection *websocket.Conn) *ToolClient {
+func NewToolClient(manager *ClientMgr, id string, connection *websocket.Conn) *ToolClient {
 	client := ToolClient{
 		id:                   id,
 		connection:           connection,
@@ -70,6 +72,7 @@ func (c *ToolClient) SendEvent(event *model.ToolEvent) {
 		log.Print("[toolprovider] error encoding response: ", err.Error())
 	}
 
+	log.Print("[toolprovider] enqueuing message to be sent to client")
 	c.chSend <- data
 }
 
@@ -83,6 +86,7 @@ func (c *ToolClient) Close() {
 func (c *ToolClient) messageReceiver() {
 	var event model.ToolEvent
 
+	log.Print("[toolclient] starting providerMessageReceiver loop")
 	for {
 		select {
 		case <-c.done:
@@ -91,7 +95,9 @@ func (c *ToolClient) messageReceiver() {
 			// should continue
 		}
 
+		log.Print("[toolclient] waiting for messages for client: ", c.id)
 		msgtype, message, err := c.connection.ReadMessage()
+		log.Print("[toolclient] message received from client: ", c.id)
 		if err != nil {
 			log.Print("[toolclient] websocket message receiving error: ", err.Error())
 			break
@@ -108,11 +114,17 @@ func (c *ToolClient) messageReceiver() {
 			break
 		}
 
-		event.Client = &c.id
+		event.Client = c.id
 
 		if c.manager.ProviderMgr == nil {
 			log.Print("[toolclient] no provider found to forward message")
 			break
+		}
+
+		log.Print("[toolclient] forwarding event to provider ", event)
+
+		if c.manager.ProviderMgr == nil {
+			panic("[toolclient] provider null when going to forward message")
 		}
 		c.manager.ProviderMgr.SendEvent(&event)
 	}
@@ -121,16 +133,20 @@ func (c *ToolClient) messageReceiver() {
 }
 
 func (c *ToolClient) messageSender() {
-	select {
-	case <-c.done:
-		return
-	case data := <-c.chSend:
-		err := c.connection.WriteMessage(websocket.TextMessage, data)
-		if err != nil {
-			log.Print("[toolclient] websocket message sending error: ", err.Error())
-			break
+	log.Print("[toolclient] starting messageSender loop for client: ", c.id)
+
+	for {
+		select {
+		case <-c.done:
+			c.activeHandlerThreads.Done()
+			return
+		case data := <-c.chSend:
+			log.Print("[toolclient] sending message to client: ", c.id)
+			err := c.connection.WriteMessage(websocket.TextMessage, data)
+			if err != nil {
+				log.Print("[toolclient] websocket message sending error: ", err.Error())
+				return
+			}
 		}
 	}
-
-	c.activeHandlerThreads.Done()
 }

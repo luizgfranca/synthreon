@@ -51,12 +51,18 @@ func (t *Tool) GetEventRresponseTEST() func(w http.ResponseWriter, r *http.Reque
 }
 
 func (t *Tool) clientConnectionHandler(connection *websocket.Conn) {
-	log.Print("[tool] new client connection")
+	log.Print("[ToolAPI] new client connection")
 	t.clientMgr.NewClient(connection)
 }
 
 func (t *Tool) providerConnectionHandler(connection *websocket.Conn) {
+	log.Print("[ToolAPI] new provider connection")
 	t.providerMgr = connectionmgr.NewProviderConnectionMgr(connection)
+
+	// TODO: maybe it should be better if instead of passing them i just passed the
+	// 		 complete tool context that would have the managers
+	t.clientMgr.ProviderMgr = t.providerMgr
+	t.providerMgr.ClientMgr = t.clientMgr
 }
 
 func upgraderAllowAllOrigins(r *http.Request) bool {
