@@ -1,4 +1,5 @@
 import { DisplayDefinition, DisplayRenderer, DsiplayRendererProps } from "@/component/displayRenderer"
+import { Prompt } from "@/component/prompt";
 import { useCallback, useMemo, useState } from "react"
 
 // const event = {
@@ -54,6 +55,13 @@ export function ToolViewExperimentsPage() {
             <div className="bg-zinc-900 text-zinc-100 h-screen">
                     <div className="container mx-auto px-4 py-8">
                     <h1 className="text-3xl font-bold mb-6">Tool Sandbox</h1>
+
+                    <div className="flex justify-center">
+                        <div className="w-4/5">
+                            <Prompt title="Test prompt component" onSubmit={(value) => console.log('onsubmit', value)} />
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         )       
