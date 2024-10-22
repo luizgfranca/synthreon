@@ -31,6 +31,12 @@ const (
 	DisplayDefniitionTypePrompt DisplayDefniitionType = "prompt"
 )
 
+type DisplayPromptType string
+
+const (
+	DisplayPromptTypeString DisplayPromptType = "string"
+)
+
 type DisplayElement struct {
 	Type        string `json:"type"`
 	Label       string `json:"label"`
@@ -44,6 +50,11 @@ type DisplayResult struct {
 	Message string `json:"message"`
 }
 
+type DisplayPrompt struct {
+	Title string            `json:"title"`
+	Type  DisplayPromptType `json:"type"`
+}
+
 // TODO: thinking about this better, maybe i dont need the result,
 //
 //	should try to emulate it with specific elements
@@ -55,6 +66,7 @@ type DisplayDefniition struct {
 	// if type=result Result should be present
 	Elements *[]DisplayElement `json:"elements"`
 	Result   *DisplayResult    `json:"result"`
+	Prompt   *DisplayPrompt    `json:"prompt"`
 }
 
 type UserInput struct {
