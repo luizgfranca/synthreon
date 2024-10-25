@@ -29,8 +29,14 @@ export type DisplayDefinition = {
     prompt?: DisplayPrompt;
 };
 
+export type Field = {
+    name: string,
+    value: string
+}
+
 export type DsiplayRendererProps = {
     definition: DisplayDefinition
+    onSumission: (fields: Field[]) => void
 }
 
 export function DisplayRenderer(props: DsiplayRendererProps) {
@@ -41,7 +47,13 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
             )
         case 'prompt':
             return (
-                <Prompt title={props.definition.prompt?.title ?? ''} onSubmit={(value) => console.log('prompt submit', value)}/>
+                <Prompt 
+                    title={props.definition.prompt?.title ?? ''} 
+                    onSubmit={(value) => props.onSumission([{
+                        name: 'prompt',
+                        value
+                    }])}
+                />
             )
     }
 

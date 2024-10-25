@@ -19,14 +19,29 @@ type DisplayResult = {
 
 type DisplayDefinitionType = 'result' | 'view' | 'prompt' | string
 
+type DisplayPrompt = {
+    title: string;
+    type: string;
+}
+
 export type DisplayDefinition = {
     type: DisplayDefinitionType;
     elements?: DisplayElement[];
     result?: DisplayResult;
+    prompt?: DisplayPrompt;
 };
 
 export type DsiplayRendererProps = {
     definition: DisplayDefinition
+}
+
+export type InputField = {
+    name: string;
+    value: string;
+}
+
+export type EventInput = {
+    fields: InputField[]
 }
 
 type ToolEvent = {
@@ -35,7 +50,8 @@ type ToolEvent = {
     project: string;
     tool: string;
     client?: string;
-    display: DisplayDefinition;
+    display?: DisplayDefinition;
+    input?: EventInput
 }
 
 ws.on('open', () => {
@@ -57,7 +73,7 @@ ws.on('message', (e) => {
         if(event.tool == 'tool-y') {
             const response: ToolEvent = {
                 class: 'operation',
-                type: 'result',
+                type: 'display',
                 project: event.project,
                 tool: event.tool,
                 client: event.client,
@@ -66,6 +82,24 @@ ws.on('message', (e) => {
                     result: {
                         success: true,
                         message: 'success running tool A'
+                    }
+                }
+            }
+
+            console.log('response event', response)
+            ws.send(JSON.stringify(response))
+        } else if(event.tool == 'tool-p') {
+            const response: ToolEvent = {
+                class: 'operation',
+                type: 'display',
+                project: event.project,
+                tool: event.tool,
+                client: event.client,
+                display: {
+                    type: 'prompt',
+                    prompt: {
+                        title: 'Add some text in the field',
+                        type: 'string'
                     }
                 }
             }
@@ -81,7 +115,7 @@ ws.on('message', (e) => {
 
                 const response: ToolEvent = {
                     class: 'operation',
-                    type: 'result',
+                    type: 'display',
                     project: event.project,
                     tool: event.tool,
                     client: event.client,
@@ -98,6 +132,26 @@ ws.on('message', (e) => {
                 ws.send(JSON.stringify(response))    
             }, 1000)
         }   
+    } else if(event.class == 'interaction' && event.type == 'input' && event.project == 'proj-x') {
+        console.log('input interaction', event)
+        
+        const response: ToolEvent = {
+            class: 'operation',
+            type: 'display',
+            project: event.project,
+            tool: event.tool,
+            client: event.client,
+            display: {
+                type: 'result',
+                result: {
+                    success: true,
+                    message: event.input?.fields[0].value ?? ''
+                }
+            }
+        }
+
+        console.log('response event', response)
+        ws.send(JSON.stringify(response))      
     }
 })
 

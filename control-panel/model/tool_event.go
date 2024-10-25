@@ -69,6 +69,11 @@ type DisplayDefniition struct {
 	Prompt   *DisplayPrompt    `json:"prompt"`
 }
 
+type InputField struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type UserInput struct {
 	// should always be present if defined
 	Fields *[]interface{} `json:"fields"`
