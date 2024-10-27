@@ -1,9 +1,10 @@
 import WebSocket, { RawData } from "ws";
 import { ToolEvent } from "./tool-event";
-import { EventEmitter } from 'node:events'
+import { EventEmitter } from "node:events";
 
 type PlatformToolConnectionOptions = {
   endpoint: string;
+  toolFunction: () => string;
 };
 
 type ToolExecution = {
@@ -26,6 +27,38 @@ export class PlatformConnection {
   #toolFunction: () => string;
   #executions: ToolExecution[];
   #status: ConnectionStatus;
+
+  constructor(options: PlatformToolConnectionOptions) {
+    this.#executions = [];
+    this.#toolFunction = options.toolFunction;
+
+    this.#endpoint = options.endpoint;
+    this.#status = "disconnected";
+  }
+
+  listen() {
+    try {
+      this.#websocket = new WebSocket(this.#endpoint);
+      this.#status = "connecting";
+    } catch (e) {
+      throw new Error(`unable to connect to websocket: ${e}`);
+    }
+
+    this.#websocket.on("open", () => {
+      console.debug("successfully connected to platform");
+      this.#makeAnnouncement();
+    });
+
+    this.#websocket.on("error", (error) => {
+      console.debug(`websocket connection error: ${error.message}`);
+    });
+
+    this.#websocket.on("message", (data: RawData) => {
+      const event = JSON.parse(data.toString()) as ToolEvent;
+      console.debug("event received: ", event);
+      this.#onEventReceived(event);
+    });
+  }
 
   #sendEvent(event: ToolEvent) {
     console.debug("sending event: ", event);
@@ -110,49 +143,19 @@ export class PlatformConnection {
   }
 
   #onEventReceived(event: ToolEvent) {
-    if (
-      this.#status === "connected" &&
-      event.class == "interaction" &&
-      event.type == "open"
-    ) {
-      this.#onToolOpen(event.project, event.tool, event.client ?? "");
-    } else if (event.class == "announcement") {
-      this.#status = "connected";
-      console.debug("announcement acknowleged");
+    // TODO: need to add sanity validations here
+    switch (this.#status) {
+      case "connected":
+        if (event.class == "interaction" && event.type == "open") {
+          this.#onToolOpen(event.project, event.tool, event.client ?? "");
+        }
+        break;
+      case "waiting_ack":
+        if (event.class == "announcement" && event.type == "ack") {
+          this.#status = "connected";
+          console.debug("announcement acknowleged");
+        }
+        break;
     }
-  }
-
-  constructor(options: PlatformToolConnectionOptions) {
-    this.#executions = [];
-    this.#toolFunction = () => {
-      return "hello world";
-    };
-
-    this.#endpoint = options.endpoint;
-    this.#status = "disconnected";
-  }
-
-  listen() {
-    try {
-      this.#websocket = new WebSocket(this.#endpoint);
-      this.#status = "connecting";
-    } catch (e) {
-      throw new Error(`unable to connect to websocket: ${e}`);
-    }
-
-    this.#websocket.on("open", () => {
-      console.debug("successfully connected to platform");
-      this.#makeAnnouncement();
-    });
-
-    this.#websocket.on("error", (error) => {
-      console.debug(`websocket connection error: ${error.message}`);
-    });
-
-    this.#websocket.on("message", (data: RawData) => {
-      const event = JSON.parse(data.toString()) as ToolEvent;
-      console.debug("event received: ", event);
-      this.#onEventReceived(event);
-    });
   }
 }
