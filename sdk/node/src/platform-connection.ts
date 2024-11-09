@@ -1,10 +1,10 @@
 import WebSocket, { RawData } from "ws";
-import { ToolEvent } from "./tool-event";
+import { PromptType, ToolEvent, DisplayDefinition, EventInput } from "./tool-event";
 import { EventEmitter } from "node:events";
 
 type PlatformToolConnectionOptions = {
   endpoint: string;
-  toolFunction: () => string;
+  toolFunction: (elements: ToolComponents) => Promise<string>;
 };
 
 type ToolExecution = {
@@ -12,6 +12,7 @@ type ToolExecution = {
   tool: string;
   client: string;
   messageBus: EventEmitter;
+  components: ToolComponents;
   promise: Promise<string>;
 };
 
@@ -21,10 +22,22 @@ type ConnectionStatus =
   | "connecting"
   | "disconnected";
 
+export type ToolComponents = {
+  io: {
+    prompt: (description: string, type: PromptType) => Promise<string>;
+  };
+};
+
+type ClientDefinition = {
+  project: string;
+  tool: string;
+  client?: string;
+};
+
 export class PlatformConnection {
   #endpoint: string;
   #websocket?: WebSocket;
-  #toolFunction: () => string;
+  #toolFunction: (components: ToolComponents) => Promise<string>;
   #executions: ToolExecution[];
   #status: ConnectionStatus;
 
@@ -55,7 +68,6 @@ export class PlatformConnection {
 
     this.#websocket.on("message", (data: RawData) => {
       const event = JSON.parse(data.toString()) as ToolEvent;
-      console.debug("event received: ", event);
       this.#onEventReceived(event);
     });
   }
@@ -70,56 +82,69 @@ export class PlatformConnection {
   }
 
   #onToolOpen(project: string, tool: string, client: string) {
+    const messageBus = new EventEmitter();
+    const components = this.#getToolComponents(messageBus);
+    this.#setupOutboundHandlers(messageBus, { project, tool, client });
+
     const execution: ToolExecution = {
-      messageBus: new EventEmitter(),
       promise: new Promise((resolve, reject) => {
         try {
-          const resultMessage = this.#toolFunction();
-          resolve(resultMessage);
+          this.#toolFunction(components)
+            .then((resultMessage) => resolve(resultMessage))
+            .catch((e) => reject(e));
         } catch (e) {
           reject(e);
         }
       }),
+      messageBus,
+      components,
       project,
       tool,
       client,
     };
 
-    execution.promise
-      .then((resultMessage) => {
-        this.#sendEvent({
-          class: "operation",
-          type: "display",
-          project: execution.project,
-          tool: execution.tool,
-          client: execution.client,
-          display: {
-            type: "result",
-            result: {
-              success: true,
-              message: resultMessage,
-            },
-          },
-        });
-      })
-      .catch((errorMessage) => {
-        this.#sendEvent({
-          class: "operation",
-          type: "display",
-          project: execution.project,
-          tool: execution.tool,
-          client: execution.client,
-          display: {
-            type: "result",
-            result: {
-              success: true,
-              message: errorMessage,
-            },
-          },
-        });
-      });
+    this.#setupExecutionResultHandlers(execution);
 
     this.#executions.push(execution);
+  }
+
+  #onInput(origin: ClientDefinition, input: EventInput) {
+    console.log("handling new input");
+
+    // TODO: this is a simplified and VERY BAD initial approach
+    //       every provider execution should have an id specifically
+    //       addressable in the response to avoid uncertainty
+    const destination = this.#executions.find(
+      (execution) =>
+        origin.project === execution.project &&
+        origin.tool === execution.tool &&
+        origin.client === execution.client
+    );
+
+    if (!destination) {
+      throw new Error("no destination found to handle input");
+    }
+
+    if (!input) {
+      throw new Error("input event received without input data");
+    }
+
+    destination.messageBus.emit("input", input);
+  }
+
+  #onToolInteraction(event: ToolEvent) {
+    const { project, tool, client} = event
+    
+    switch (event.type) {
+      case "open":
+        return this.#onToolOpen(event.project, event.tool, event.client ?? "");
+      case "input":
+        if (!event.input) {
+          throw new Error('expected to receive input parameter on "input" event')
+        }
+
+        return this.#onInput({ project, tool, client}, event.input)
+    }
   }
 
   #makeAnnouncement() {
@@ -143,11 +168,13 @@ export class PlatformConnection {
   }
 
   #onEventReceived(event: ToolEvent) {
+    console.log("event received: ", event);
+
     // TODO: need to add sanity validations here
     switch (this.#status) {
       case "connected":
-        if (event.class == "interaction" && event.type == "open") {
-          this.#onToolOpen(event.project, event.tool, event.client ?? "");
+        if (event.class == "interaction") {
+          this.#onToolInteraction(event);
         }
         break;
       case "waiting_ack":
@@ -157,5 +184,113 @@ export class PlatformConnection {
         }
         break;
     }
+  }
+
+  #getPromptFunction(
+    messageBus: EventEmitter
+  ): (title: string, type: PromptType) => Promise<string> {
+    return (title: string, type: PromptType) => {
+      console.debug("getPromptFunction", { title, type });
+      return new Promise((resolve, reject) => {
+        console.debug("executing prompt dispatch", { title, type });
+        const display: DisplayDefinition = {
+          type: "prompt",
+          prompt: {
+            title,
+            type,
+          },
+        };
+
+        console.debug("sending display definition to messageBus", display);
+        messageBus.emit("display", display);
+
+        messageBus.on("display", (definition) => {
+          console.debug("[probe] definition received", definition);
+        });
+
+        messageBus.on("input", (input: EventInput) => {
+          console.log("input received by prompt handler: ", input);
+
+          if (input.fields.length == 0) {
+            return reject("Internal Error: did not receive field result");
+          }
+
+          resolve(input.fields[0].value);
+        });
+      });
+    };
+  }
+
+  #getToolComponents(messageBus: EventEmitter): ToolComponents {
+    return {
+      io: {
+        prompt: this.#getPromptFunction(messageBus),
+      },
+    };
+  }
+
+  #setupExecutionResultHandlers(execution: ToolExecution) {
+    console.debug("setupExecutionBaseHandlers");
+    execution.promise
+      .then((resultMessage) => {
+        console.log("executing success result trap");
+
+        this.#sendEvent({
+          class: "operation",
+          type: "display",
+          project: execution.project,
+          tool: execution.tool,
+          client: execution.client,
+          display: {
+            type: "result",
+            result: {
+              success: true,
+              message: resultMessage,
+            },
+          },
+        });
+      })
+      .catch((errorMessage) => {
+        console.log("executing error result trap");
+        this.#sendEvent({
+          class: "operation",
+          type: "display",
+          project: execution.project,
+          tool: execution.tool,
+          client: execution.client,
+          display: {
+            type: "result",
+            result: {
+              success: true,
+              message: errorMessage,
+            },
+          },
+        });
+      });
+  }
+
+  #setupOutboundHandlers(messageBus: EventEmitter, client: ClientDefinition) {
+    console.debug("setupExecutionOutboundHandlers");
+
+    messageBus.on("display", (definition: DisplayDefinition) => {
+      console.debug("display definition received on messageBus", definition);
+
+      const event: ToolEvent = {
+        class: "operation",
+        type: "display",
+        project: client.project,
+        tool: client.tool,
+        client: client.client,
+        display: definition
+      };
+
+      if (!this.#websocket) {
+        throw new Error(
+          "Internal error: expected websocket to be defined to send event"
+        );
+      }
+
+      this.#sendEvent(event);
+    });
   }
 }

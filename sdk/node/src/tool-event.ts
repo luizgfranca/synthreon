@@ -13,9 +13,11 @@ type DisplayResult = {
 
 type DisplayDefinitionType = 'result' | 'view' | 'prompt' | string
 
-type DisplayPrompt = {
+export type PromptType = 'string'
+
+export type DisplayPrompt = {
     title: string;
-    type: string;
+    type: PromptType;
 }
 
 export type DisplayDefinition = {
