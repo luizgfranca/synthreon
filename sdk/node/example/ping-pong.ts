@@ -12,7 +12,7 @@ const connection = new PlatformConnection({
             return 'pong'
         }
 
-        return '...'
+        throw '...'
     }
 })
 
