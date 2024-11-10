@@ -2,45 +2,51 @@
 
 ### Hello world case
 client to server
-```
+```jsonc
 v0.0|{
     "type": "interaction/open",
     "project": "proj-x",
-    "tool": "tool-y"
+    "tool": "tool-y",
+    "session_id": "shdfkajhdflaksjdfhalksdjh",
 }
 ```
 
 server to provider
-```
+```jsonc
 v0.0|{
     "type": "interaction/open",
-    "tool": "tool-y"
-    // still to specify how to transmit the origin client
+    "project": "tool-y",
+    "tool": "tool-y",
+    "provider_id": UUID,
+    "handler_id": UUID,
+    "context_id": UUID
 }
 ```
 
 provider to server
-```
+```jsonc
 v0.0|{
     "type": "command/finish",
-    "tool": "tool-y"
-    // still to specify how to transmit the destination client
+    "project": "tool-y",
+    "tool": "tool-y",
+    "provider_id": UUID,
+    "handler_id": UUID,
+    "context_id": UUID,
+    "execution_id": UUID,
     "result": {
-        "status": "success" | "error" | "undetermined"
+        "status": "success" | "error" | "undetermined",
         "message": "Hello world"
     }
 }
 ```
 
 server to client
-```
+```jsonc
 v0.0|{
     "type": "command/display",
-    "tool": "tool-y"
-    "execution_id": UUID,
-    // it should return a reference to the provider that is serving this
-    // still to specify how to transmit the destination client
-
+    "project": "tool-y",
+    "tool": "tool-y",
+    "context_id": UUID,
     "display": {
         "type": "result",
         "result": {
