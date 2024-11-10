@@ -107,7 +107,7 @@ v0.0|{
     "handler_id": UUID,
     "execution_id": UUID,
     "result": {
-        "status": "success"
+        "status": "success",
         "message": "pong"
     }
 }
