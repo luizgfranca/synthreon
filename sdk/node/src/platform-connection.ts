@@ -261,7 +261,7 @@ export class PlatformConnection {
           display: {
             type: "result",
             result: {
-              success: true,
+              success: false,
               message: errorMessage,
             },
           },
