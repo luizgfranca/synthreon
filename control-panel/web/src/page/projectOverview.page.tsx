@@ -1,13 +1,43 @@
-export function ProjectOverviewPage(props: unknown) {
-    console.log('props', props)
-    const project = window.location.pathname.split('/')[2];
+import { ProjectHeader } from "@/component/projectHeader";
+import { ProjectSidebar } from "@/component/projectSidebar";
+import { useProvider } from "@/context/root";
+import { ToolDto } from "@/dto/tool.dto";
+import { ToolView } from "@/view/toolView";
+import { useState } from "react";
 
+const defaultTools: ToolDto[] = [
+    {
+        id: 0,
+        acronym: 'sandbox',
+        name: 'Sandbox',
+        description: 'Sandbox development environment for tools',
+        project_id: 0
+    }
+]
+
+export function ProjectOverviewPage(props: unknown) {
+    const [selectedTool, setSelectedTool] = useState<string | undefined>();
+
+    const provider = useProvider();
+    const projectAcronym = window.location.pathname.split('/')[2];
+
+    const project = provider.getProjects().find(project => project.acronym === projectAcronym);
+
+    const onToolSelection = (tool: ToolDto) => {
+        console.log(`tool ${tool.name} selected from project ${project?.name}`)
+        setSelectedTool(tool.acronym);
+    }
 
     return (
-        <div className="bg-zinc-900 text-zinc-100 h-screen">
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-6">{project}</h1>
-
+        <div>
+            <ProjectHeader projectName={project?.name ?? ''}/>
+            <div className="grid grid-cols-5 h-screen text-zinc-100">
+                <div className="col-span-1">
+                    <ProjectSidebar tools={defaultTools} onSelect={onToolSelection}/>
+                </div>
+                <main className="col-span-4">
+                    <ToolView project={project?.acronym} tool={selectedTool} />
+                </main>
             </div>
         </div>
     )

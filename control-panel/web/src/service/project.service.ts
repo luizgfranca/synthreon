@@ -1,9 +1,4 @@
-export type ProjectDto = {
-    id: number,
-    acronym: string,
-    name: string,
-    description: string
-}
+import { ProjectDto } from "@/dto/project.dto"
 
 export type QueryProjecstDto = ProjectDto[]
 

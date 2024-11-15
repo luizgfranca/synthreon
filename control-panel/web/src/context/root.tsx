@@ -1,6 +1,6 @@
 import { ProjectDatasource } from "@/datasource/project.datasource";
+import { ProjectDto } from "@/dto/project.dto";
 import { OnlyChildrenProps } from "@/lib/only-children-props";
-import { ProjectDto } from "@/service/project.service";
 import { createContext, useContext } from "react";
 
 export interface State {
