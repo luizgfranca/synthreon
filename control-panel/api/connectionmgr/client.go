@@ -6,6 +6,7 @@ import (
 	"platformlab/controlpanel/model"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -116,9 +117,9 @@ func (c *ToolClient) messageReceiver() {
 
 		event.Client = c.id
 
-		if c.manager.ProviderMgr == nil {
+		for c.manager.ProviderMgr == nil {
 			log.Print("[toolclient] no provider found to forward message")
-			break
+			time.Sleep(1 * time.Second)
 		}
 
 		log.Print("[toolclient] forwarding event to provider ", event)
