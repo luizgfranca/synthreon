@@ -4,12 +4,17 @@ import (
 	"log"
 	"net/http"
 	"platformlab/controlpanel/api"
+	"platformlab/controlpanel/api/middleware"
 	"platformlab/controlpanel/model"
 	"platformlab/controlpanel/service"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+)
+
+const (
+	AccessTokenSecretKey string = "supersecret"
 )
 
 func DoMigrations(db *gorm.DB) {
@@ -84,8 +89,9 @@ func main() {
 
 	projectAPI := api.ProjectRESTApi(db)
 	toolAPI := api.ToolRestAPI(db)
-	authenticationAPI := api.AuthenticationRESTApi(db)
+	authenticationAPI := api.AuthenticationRESTApi(db, AccessTokenSecretKey)
 	tableAPI := api.Table{}
+	sessionMiddleware := middleware.SessionMiddleware("sdfsdf")
 
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -96,14 +102,17 @@ func main() {
 	})
 
 	router.HandleFunc("/api/auth/login", authenticationAPI.Login()).Methods("POST")
-	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
-	router.HandleFunc("/api/project", projectAPI.CreateProject()).Methods("POST")
-	router.HandleFunc("/api/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")
-	router.HandleFunc("/api/project/{project}/tool", projectAPI.CreateToolForProject()).Methods("POST")
 	router.HandleFunc("/api/tool/event", toolAPI.GetEventRresponseTEST()).Methods("POST")
-	router.HandleFunc("/api/tool/client/ws", toolAPI.ToolClientWebsocket()).Methods("GET")
 	router.HandleFunc("/api/tool/provider/ws", toolAPI.ToolProviderWebsocket()).Methods("GET")
 	router.HandleFunc("/api/table", tableAPI.GetTablesMetadata())
+
+	authenticatedRouter := router.PathPrefix("/api").Subrouter()
+	authenticatedRouter.Use(sessionMiddleware)
+	authenticatedRouter.HandleFunc("/project", projectAPI.GetAllProjects()).Methods("GET")
+	authenticatedRouter.HandleFunc("/project", projectAPI.CreateProject()).Methods("POST")
+	authenticatedRouter.HandleFunc("/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")
+	authenticatedRouter.HandleFunc("/project/{project}/tool", projectAPI.CreateToolForProject()).Methods("POST")
+	authenticatedRouter.HandleFunc("/tool/client/ws", toolAPI.ToolClientWebsocket()).Methods("GET")
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/control-panel", http.StatusFound)

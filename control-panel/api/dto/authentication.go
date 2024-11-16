@@ -8,15 +8,17 @@ type LoginRequestDto struct {
 }
 
 type LoginSuccessResopnseDto struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	AccessToken string `json:"access_token"`
 }
 
-func NewLoginSuccessResponseDto(user *model.User) *LoginSuccessResopnseDto {
+func NewLoginSuccessResponseDto(session *model.Session, accessToken *string) *LoginSuccessResopnseDto {
 	return &LoginSuccessResopnseDto{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:          session.UserId,
+		Name:        session.Name,
+		Email:       session.Email,
+		AccessToken: *accessToken,
 	}
 }

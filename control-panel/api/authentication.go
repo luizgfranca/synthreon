@@ -6,13 +6,15 @@ import (
 	"log"
 	"net/http"
 	api "platformlab/controlpanel/api/dto"
+	"platformlab/controlpanel/model"
 	"platformlab/controlpanel/service"
 
 	"gorm.io/gorm"
 )
 
 type Authentication struct {
-	userService service.User
+	userService    service.User
+	sessionService service.Session
 }
 
 func (a *Authentication) Login() func(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +35,23 @@ func (a *Authentication) Login() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response := api.NewLoginSuccessResponseDto(user)
+		session := model.NewSessionFromUser(user)
+		accessToken, err := a.sessionService.CreateToken(*session)
+		if err != nil {
+			log.Println("[AuthenticationAPI] unable to create token: ", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "accesstoken.error"})
+			return
+		}
+
+		response := api.NewLoginSuccessResponseDto(session, accessToken)
 		json.NewEncoder(w).Encode(&response)
 	}
 }
 
-func AuthenticationRESTApi(db *gorm.DB) *Authentication {
-	return &Authentication{userService: service.User{Db: db}}
+func AuthenticationRESTApi(db *gorm.DB, accessTokenSecretKey string) *Authentication {
+	return &Authentication{
+		userService:    service.User{Db: db},
+		sessionService: *service.NewSessionService(accessTokenSecretKey),
+	}
 }
