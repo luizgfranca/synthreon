@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"platformlab/controlpanel/api"
 	"platformlab/controlpanel/model"
+	"platformlab/controlpanel/service"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -14,6 +15,7 @@ import (
 func DoMigrations(db *gorm.DB) {
 	db.AutoMigrate(&model.Project{})
 	db.AutoMigrate(&model.Tool{})
+	db.AutoMigrate(&model.User{})
 }
 
 func CreateMockProjects(db *gorm.DB) {
@@ -25,6 +27,25 @@ func CreateMockProjects(db *gorm.DB) {
 
 	for _, it := range p {
 		db.Create(&it)
+	}
+}
+
+func CreateDefaultUserIfNotExists(db *gorm.DB) {
+	s := service.User{Db: db}
+
+	defaultUser, err := model.NewUser("admin", "test@test.com", "password")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	user, _ := s.FindByEmail(defaultUser.Email)
+	if user != nil {
+		return
+	}
+
+	_, err = s.Create(defaultUser)
+	if err != nil {
+		panic(err.Error())
 	}
 }
 
@@ -57,10 +78,16 @@ func main() {
 	CreateMockProjects(db)
 	println("done")
 
+	println("asseting creation of default user")
+	CreateDefaultUserIfNotExists(db)
+	println("done")
+
 	projectAPI := api.ProjectRESTApi(db)
 	toolAPI := api.ToolRestAPI(db)
+	authenticationAPI := api.AuthenticationRESTApi(db)
 	tableAPI := api.Table{}
 
+	router.HandleFunc("/api/auth/login", authenticationAPI.Login()).Methods("POST")
 	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
 	router.HandleFunc("/api/project", projectAPI.CreateProject()).Methods("POST")
 	router.HandleFunc("/api/project/{project}/tool", projectAPI.GetToolsFromProject()).Methods("GET")

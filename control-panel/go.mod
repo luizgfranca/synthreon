@@ -2,6 +2,8 @@ module platformlab/controlpanel
 
 go 1.22.5
 
+require golang.org/x/crypto v0.29.0
+
 require (
 	github.com/PuerkitoBio/goquery v1.9.2 // indirect
 	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a // indirect
@@ -30,9 +32,9 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gorm.io/driver/sqlite v1.5.6 // indirect
 	gorm.io/gorm v1.25.11 // indirect
