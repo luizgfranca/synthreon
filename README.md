@@ -11,13 +11,13 @@ This project is still in early prototyping stage, please come back later for a f
 There are 2 early-stage technology demonstrations you can already run:
 
 ### Dependencies
-To run the control panel and look at the examples you need to first prepare the dependencies
+To run the control panel and look at the examples you need to first setup the dependencies
 You will need:
  - go >= 1.22
  - nodejs 22
  - yarn (recomended)
 
-### Preparing
+### Setup
 
 Install ts-node globally
 ```bash
@@ -59,15 +59,19 @@ cd control-panel/web
 yarn dev
 ```
 
-Open another terminal window, choose the example you want to run and run it with `ts-node`
+Enter http://localhost:5173 using your browser and select any of the sample projects.
+
+Select the "sandbox" tool in the sidebar, and a screen containing the message "Waiting for provider..." will appear
+
+To start any of the example tool providers open another terminal window, choose the example you want to run inside the `sdk/node/example` folder and run it with `ts-node`
+
 For instance, here's how you would run the `ping-pong` example:
 ```bash
 cd sdk/node
 ts-node example/ping-pong.ts 
 ```
 
-Now to access and test the tool enter the browser on `http://localhost:5173/exp`
-
+Doing this the "Waiting for provider..." message should be replaced by the instantiated tool's interface. 
 
 ## Components
  - **control-panel**: will host the tools
