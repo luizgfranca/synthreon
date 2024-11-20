@@ -2,6 +2,14 @@
 
 This project aims to be a easy way to provide a platform to create internal tools to create quick automations and provide ways to simplify the management of application's resources.
 
+Here is a quick demonstration of what it can do in its current state of development:
+
+
+
+https://github.com/user-attachments/assets/24318aa1-1f95-48c1-b596-2b44f506e816
+
+
+
 
 ## Status 
 This project is still in early prototyping stage, please come back later for a full proof-of-concept.
