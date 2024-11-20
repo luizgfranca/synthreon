@@ -1,3 +1,5 @@
+import { useProvider } from "@/context/root";
+import AuthService from "@/service/auth.service";
 import { Button } from "@/vendor/shadcn/components/ui/button";
 import { Card, CardContent } from "@/vendor/shadcn/components/ui/card";
 import {
@@ -16,6 +18,9 @@ import { useNavigate } from "react-router-dom";
 export function LoginPage() {
   const form = useForm();
   const navigate = useNavigate();
+  const provider = useProvider();
+
+  
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -24,9 +29,27 @@ export function LoginPage() {
           <h1 className="text-2xl font-bold pb-8">Enter your control panel</h1>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((e) => {
-                console.log("onsubmit", e);
-                navigate("/");
+              onSubmit={form.handleSubmit((event) => {
+                console.log("onsubmit", event);
+                const { email, password } = event;
+
+                AuthService.tryLogin({ email, password })
+                  .then(() => {
+                    console.log('resolved')
+                    navigate("/")
+                  })
+                  .catch(() => {
+                    console.log('catched')
+                    form.setError('email', {message: 'invalid username and/or password'})
+                    form.setError('password', {message: 'invalid username and/or password'})
+
+                    setTimeout(() => {
+                      form.clearErrors('email');
+                      form.clearErrors('password');
+                    }, 5000)
+                  })
+
+                // 
               })}
               className="space-y-8"
             >

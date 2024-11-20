@@ -55,7 +55,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Content-Type", "application/json")
 
 		next.ServeHTTP(w, r)
@@ -86,6 +86,14 @@ func main() {
 	toolAPI := api.ToolRestAPI(db)
 	authenticationAPI := api.AuthenticationRESTApi(db)
 	tableAPI := api.Table{}
+
+	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNoContent)
+	})
 
 	router.HandleFunc("/api/auth/login", authenticationAPI.Login()).Methods("POST")
 	router.HandleFunc("/api/project", projectAPI.GetAllProjects()).Methods("GET")
