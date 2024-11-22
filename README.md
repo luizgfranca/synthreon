@@ -1,6 +1,6 @@
 # PlatformLab
 
-This project aims to be a easy way to provide a platform to create internal tools to create quick automations and provide ways to simplify the management of application's resources.
+PlatformLab (name subject to change) is a project that aims to provide a platform for an application developer, a team, or an entire company to create internal tools for quick automation and simplify the management of an application's resources.
 
 Here is a quick demonstration of what it can do in its current state of development:
 
@@ -12,18 +12,18 @@ https://github.com/user-attachments/assets/24318aa1-1f95-48c1-b596-2b44f506e816
 
 
 ## Status 
-This project is still in early prototyping stage, please come back later for a full proof-of-concept.
+This project is still in the early prototyping stage, please return later for a full proof-of-concept.
 
 
 ## Run the demonstrations
 There are 2 early-stage technology demonstrations you can already run:
 
 ### Dependencies
-To run the control panel and look at the examples you need to first setup the dependencies
+To run the control panel and look at the examples you need first to set up the dependencies
 You will need:
  - go >= 1.22
- - nodejs 22
- - yarn (recomended)
+ - node.js 22
+ - yarn (recommended)
 
 ### Setup
 
@@ -69,9 +69,9 @@ yarn dev
 
 Enter http://localhost:5173 using your browser and select any of the sample projects.
 
-Select the "sandbox" tool in the sidebar, and a screen containing the message "Waiting for provider..." will appear
+Select the "sandbox" tool in the sidebar, and a screen containing the message "Waiting for provider..." will appear.
 
-To start any of the example tool providers open another terminal window, choose the example you want to run inside the `sdk/node/example` folder and run it with `ts-node`
+To start any of the example tool providers open another terminal window, choose the example you want to run inside the `sdk/node/example` folder, and run it with `ts-node`
 
 For instance, here's how you would run the `ping-pong` example:
 ```bash
@@ -85,4 +85,4 @@ Doing this the "Waiting for provider..." message should be replaced by the insta
  - **control-panel**: will host the tools
  - **control-panel/web**: frontend of the tool server
  - **sdk**: will enable applications to connect to the server and provide the tools
- - **agent**: prototype for internal agent for infrasctructure management (development paused)
+ - **agent**: prototype for the internal agent for infrastructure management (development paused)
