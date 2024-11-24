@@ -1,18 +1,28 @@
 package api
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
 	"platformlab/controlpanel/api/connectionmgr"
 	"platformlab/controlpanel/model"
+	"platformlab/controlpanel/service"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
+const (
+	CredentialsUsernamePosition = 0
+	CredentialsPasswordPosition = 1
+)
+
 type Tool struct {
 	websocketUpgrader websocket.Upgrader
+
+	userService service.User
 
 	providerMgr *connectionmgr.ProviderMgr
 	clientMgr   *connectionmgr.ClientMgr
@@ -85,6 +95,54 @@ func (t *Tool) ToolClientWebsocket() func(w http.ResponseWriter, r *http.Request
 
 func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		log.Println("[ToolApi] validating credentials")
+
+		authorizationHeader := r.Header.Get("Authorization")
+		if authorizationHeader == "" {
+			log.Println("[ToolApi] expected authorization header")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "provider.unauthorized"})
+			return
+		}
+
+		log.Println("[ToolApi] authorizationHeader: ", authorizationHeader)
+
+		headerParts := strings.Split(authorizationHeader, " ")
+		if len(headerParts) < 2 || !strings.EqualFold(headerParts[0], "basic") {
+			log.Println("[ToolApi] malformed authorization header")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "provider.unauthorized"})
+			return
+		}
+
+		credentialsStr, err := base64.StdEncoding.DecodeString(headerParts[1])
+		if err != nil {
+			log.Println("[ToolApi] invalid header's credentials string")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "provider.unauthorized"})
+			return
+		}
+
+		credentials := strings.Split(string(credentialsStr), ":")
+		if len(credentials) < 2 {
+			log.Println("[ToolApi] malformed credentials")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "provider.unauthorized"})
+			return
+		}
+
+		_, err = t.userService.VerifyAuthenticationCredentials(
+			&credentials[CredentialsUsernamePosition],
+			&credentials[CredentialsPasswordPosition],
+		)
+		if err != nil {
+			log.Println("[ToolApi] invalid user credentials")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrorMessage{Message: "provider.unauthorized"})
+			return
+		}
+
 		connection, err := t.websocketUpgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Print("websocket upgrade error: ", err.Error())
@@ -98,5 +156,12 @@ func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Reque
 }
 
 func ToolRestAPI(db *gorm.DB) *Tool {
-	return &Tool{websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins}, nil, &connectionmgr.ClientMgr{}}
+	return &Tool{
+		websocketUpgrader: websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins},
+
+		userService: service.User{Db: db},
+
+		clientMgr:   &connectionmgr.ClientMgr{},
+		providerMgr: nil,
+	}
 }

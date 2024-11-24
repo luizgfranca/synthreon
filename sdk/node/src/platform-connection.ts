@@ -2,9 +2,15 @@ import WebSocket, { RawData } from "ws";
 import { PromptType, ToolEvent, DisplayDefinition, EventInput } from "./tool-event";
 import { EventEmitter } from "node:events";
 
+type UserCredentials = {
+  username: string,
+  password: string
+}
+
 type PlatformToolConnectionOptions = {
   endpoint: string;
   toolFunction: (elements: ToolComponents) => Promise<string>;
+  credentials: UserCredentials
 };
 
 type ToolExecution = {
@@ -40,6 +46,7 @@ export class PlatformConnection {
   #toolFunction: (components: ToolComponents) => Promise<string>;
   #executions: ToolExecution[];
   #status: ConnectionStatus;
+  #credentials: UserCredentials
 
   constructor(options: PlatformToolConnectionOptions) {
     this.#executions = [];
@@ -47,11 +54,18 @@ export class PlatformConnection {
 
     this.#endpoint = options.endpoint;
     this.#status = "disconnected";
+    this.#credentials = options.credentials
   }
 
   listen() {
     try {
-      this.#websocket = new WebSocket(this.#endpoint);
+      this.#websocket = new WebSocket(this.#endpoint, {
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            `${this.#credentials.username}:${this.#credentials.password}`
+          ).toString("base64")}`,
+        },
+      });
       this.#status = "connecting";
     } catch (e) {
       throw new Error(`unable to connect to websocket: ${e}`);
