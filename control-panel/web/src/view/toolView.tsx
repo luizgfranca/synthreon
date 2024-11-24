@@ -1,6 +1,7 @@
 import { DisplayRenderer, Field } from "@/component/displayRenderer";
 import { EmptyState } from "@/component/emptyState";
 import { ToolEvent } from "@/model/toolEvent";
+import BackendService from "@/service/backend.service";
 import { useMemo, useState } from "react";
 
 type ToolViewProps = {
@@ -16,9 +17,14 @@ function sendEvent(ws: WebSocket, event: ToolEvent) {
 export function ToolView(props: ToolViewProps) {
     const [event, setEvent] = useState<ToolEvent | null>(null)
     console.log('e', event)
+
+    const accessToken = BackendService.getAccessToken() ?? ''
     
     const ws = useMemo(() => {
-        const ws = new WebSocket(`${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`)
+        const ws = new WebSocket(
+            `${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`,
+            [ accessToken ]
+        )
         ws.addEventListener('open', () => {
             console.log('socket open', {
                 project: props.project,
