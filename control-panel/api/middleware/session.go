@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"platformlab/controlpanel/api"
 	"platformlab/controlpanel/service"
+	"strings"
 )
 
 func SessionMiddleware(secret string) func(next http.Handler) http.Handler {
@@ -15,28 +16,32 @@ func SessionMiddleware(secret string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				log.Println("Executing authentication middleware")
+				log.Println("[sessionMiddleware] Executing session middleware")
 
-				cookie, err := r.Cookie("session")
-				if err != nil {
-					log.Print("error getting session token: ", err.Error())
-					w.WriteHeader(http.StatusUnauthorized)
-					json.NewEncoder(w).Encode(api.ErrorMessage{Message: err.Error()})
-					return
-				}
-
-				if cookie == nil {
-					log.Print("session cookit not found on request")
+				authorizationHeader := r.Header.Get("Authorization")
+				if authorizationHeader == "" {
+					log.Print("[sessionMiddleware] unable to get authorization header")
 					w.WriteHeader(http.StatusUnauthorized)
 					json.NewEncoder(w).Encode(api.ErrorMessage{Message: "session.required"})
 					return
 				}
 
-				session, err := sessionService.DecodeToken(cookie.Value)
+				authorizationHeaderParts := strings.Split(authorizationHeader, " ")
+				if len(authorizationHeaderParts) < 2 || !strings.EqualFold(authorizationHeaderParts[0], "bearer") {
+					log.Print("[sessionMiddleware] unexpected authorization header structure")
+					w.WriteHeader(http.StatusUnauthorized)
+					json.NewEncoder(w).Encode(api.ErrorMessage{Message: "session.required"})
+					return
+				}
+
+				accessToken := authorizationHeaderParts[1]
+
+				session, err := sessionService.DecodeToken(accessToken)
 				if err != nil {
-					log.Print("error loading session token: ", err.Error())
+					log.Print("[sessionMiddleware] error loading session token: ", err.Error())
 					w.WriteHeader(http.StatusUnauthorized)
 					json.NewEncoder(w).Encode(api.ErrorMessage{Message: err.Error()})
+					return
 				}
 
 				ctx := context.WithValue(r.Context(), RequestContextSession, session)

@@ -91,7 +91,7 @@ func main() {
 	toolAPI := api.ToolRestAPI(db)
 	authenticationAPI := api.AuthenticationRESTApi(db, AccessTokenSecretKey)
 	tableAPI := api.Table{}
-	sessionMiddleware := middleware.SessionMiddleware("sdfsdf")
+	sessionMiddleware := middleware.SessionMiddleware(AccessTokenSecretKey)
 
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

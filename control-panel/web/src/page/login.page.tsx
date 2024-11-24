@@ -6,21 +6,19 @@ import {
   Form,
   FormControl,
   FormField,
-  FormItem,
-  FormLabel,
+  FormItem
 } from "@/vendor/shadcn/components/ui/form";
 import { Input } from "@/vendor/shadcn/components/ui/input";
-import { Label } from "@/vendor/shadcn/components/ui/label";
-import { Separator } from "@radix-ui/react-separator";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const form = useForm();
   const navigate = useNavigate();
-  const provider = useProvider();
 
-  
+  if(AuthService.isAuthenticated()) {
+    AuthService.logout();
+  }
 
   return (
     <div className="flex h-screen items-center justify-center">

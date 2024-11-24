@@ -11,13 +11,15 @@ const RootContext = createContext<State | null>(null);
 
 const projectsDatasource = new ProjectDatasource();
 
+function getProjects() {
+  return projectsDatasource.get();
+}
+
 export function ContextProvider(props: OnlyChildrenProps) {
   return (
     <RootContext.Provider
       value={{
-        getProjects() {
-          return projectsDatasource.get();
-        },
+        getProjects
       }}
     >
       {props.children}

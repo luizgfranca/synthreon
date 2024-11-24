@@ -2,6 +2,7 @@ import { GenericErrorDto } from "@/dto/generic-error.dto"
 import { LoginRequestDto } from "@/dto/login.dto"
 import { ProjectDto } from "@/dto/project.dto"
 import { LoginResponseDto } from "@/dto/login.dto"
+import BackendService from "./backend.service"
 
 export type QueryProjecstDto = ProjectDto[]
 
@@ -22,7 +23,10 @@ function tryLogin(body: LoginRequestDto) {
                 }
                 return response.json()
             })
-            .then(data => resolve(data as LoginResponseDto))
+            .then((data: LoginResponseDto) => {
+                BackendService.saveAccessToken(data.access_token)
+                resolve(data)
+            })
             .catch(e => {
                 console.log(e)
                 console.log('genericerror', e)
@@ -31,8 +35,18 @@ function tryLogin(body: LoginRequestDto) {
     })
 }
 
+function isAuthenticated() {
+    return BackendService.getAccessToken() != null
+}
+
+function logout() {
+    BackendService.clearAccessToken();
+}
+
 const AuthService = {
-    tryLogin
+    tryLogin,
+    isAuthenticated,
+    logout
 }
 
 export default AuthService;

@@ -9,6 +9,8 @@ import (
 
 type TokenClaims struct {
 	jwt.RegisteredClaims
+	Iss   string `json:"iss"`
+	Sub   string `json:"sub"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
@@ -40,21 +42,31 @@ func (s *Session) DecodeToken(token_str string) (*model.Session, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return s.secret, nil
+		return []byte(s.secret), nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*TokenClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
+	}
+
+	name, ok := claims["name"].(string)
 	if !ok {
 		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	session := model.Session{
-		Email: claims.Email,
-		Name:  claims.Name,
+		Email: email,
+		Name:  name,
 	}
 
 	return &session, nil

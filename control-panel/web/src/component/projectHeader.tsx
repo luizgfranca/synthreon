@@ -1,5 +1,6 @@
 type ProjectHeaderProps = {
-    projectName: string;
+    projectName: string; 
+    onLogoutClick: () => void
 }
 
 export function ProjectHeader(props: ProjectHeaderProps) {
@@ -14,7 +15,7 @@ export function ProjectHeader(props: ProjectHeaderProps) {
         </button>
 
         <div className="flex items-center">
-            <button className="text-sm mr-10 px-2 py-1 bg-zinc-800 text-zinc-100">
+            <button className="text-sm mr-10 px-2 py-1 bg-zinc-800 text-zinc-100" onClick={props.onLogoutClick}>
                 <span>Logout</span>
             </button>
         </div>
