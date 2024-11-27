@@ -23,13 +23,21 @@ func DoMigrations(db *gorm.DB) {
 	db.AutoMigrate(&model.User{})
 }
 
-func CreateExampleProjects(db *gorm.DB) {
-	p := []model.Project{
+func CreateExampleProjectsIfNotExists(db *gorm.DB) {
+	s := service.Project{Db: db}
+
+	testProjects := []model.Project{
 		{Acronym: "sandbox", Name: "Sandbox", Description: "Sandbox project to test tool development."},
 	}
 
-	for _, it := range p {
-		db.Create(&it)
+	for i := range testProjects {
+		p := testProjects[i]
+
+		dbProject, _ := s.FindByAcronym(p.Acronym)
+		if dbProject == nil {
+			log.Println("saving: ", p.Acronym)
+			s.Create(&p)
+		}
 	}
 }
 
@@ -78,7 +86,7 @@ func main() {
 	println("done")
 
 	println("creating example projects")
-	CreateExampleProjects(db)
+	CreateExampleProjectsIfNotExists(db)
 	println("done")
 
 	println("asseting creation of default user")
