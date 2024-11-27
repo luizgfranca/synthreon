@@ -22,12 +22,12 @@ func (p *Project) getProjectParameter(r *http.Request) (*model.Project, error) {
 	params := mux.Vars(r)
 	projectAcronym := params["project"]
 	if projectAcronym == "" {
-		return nil, &model.GenericLogicError{Message: "No project found in request"}
+		return nil, &util.GenericLogicError{Message: "No project found in request"}
 	}
 
 	project, err := p.projectService.FindByAcronym(projectAcronym)
 	if err != nil {
-		return nil, &model.GenericLogicError{Message: "Project not found"}
+		return nil, &util.GenericLogicError{Message: "Project not found"}
 	}
 
 	return project, nil

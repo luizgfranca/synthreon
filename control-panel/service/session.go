@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"platformlab/controlpanel/model"
+	"platformlab/controlpanel/util"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -51,17 +52,17 @@ func (s *Session) DecodeToken(token_str string) (*model.Session, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &util.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok {
-		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &util.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	name, ok := claims["name"].(string)
 	if !ok {
-		return nil, &model.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &util.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	session := model.Session{

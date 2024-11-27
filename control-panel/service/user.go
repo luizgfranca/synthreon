@@ -17,7 +17,7 @@ func (u *User) FindByEmail(email string) (*model.User, error) {
 
 	result := u.Db.Where("email = ?", email).First(&maybeUser)
 	if result.Error != nil {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("user with email %s not found", email),
 		}
 	}
@@ -31,9 +31,9 @@ func (u *User) VerifyAuthenticationCredentials(email *string, password *string) 
 		return nil, err
 	}
 
-	isValid := util.VerifyPassword(password, &user.Hash)
+	isValid := model.VerifyPassword(password, &user.Hash)
 	if !isValid {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("invalid password for user %s", *email),
 		}
 	}
@@ -46,7 +46,7 @@ func (u *User) Create(user *model.User) (*model.User, error) {
 
 	_, err := u.FindByEmail(user.Email)
 	if err == nil {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("element with email %s already exists", user.Email),
 		}
 	}

@@ -1,7 +1,5 @@
 package model
 
-import "platformlab/controlpanel/util"
-
 type User struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -10,7 +8,7 @@ type User struct {
 }
 
 func NewUser(name string, email string, password string) (*User, error) {
-	hash, err := util.GenerateHash(&password)
+	hash, err := GenerateHash(&password)
 	if err != nil {
 		return nil, err
 	}

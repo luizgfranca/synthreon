@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"platformlab/controlpanel/model"
+	"platformlab/controlpanel/util"
 	"strconv"
 	"sync"
 	"time"
@@ -41,7 +42,7 @@ func (m *ClientMgr) SendEvent(client uint, e *model.ToolEvent) error {
 	log.Print("[ToolClient] clents: ", m.clients)
 	if len(m.clients) <= int(client) {
 		m.clientAdditionMutex.Unlock()
-		return &model.GenericLogicError{Message: "client not found"}
+		return &util.GenericLogicError{Message: "client not found"}
 	}
 	m.clientAdditionMutex.Unlock()
 

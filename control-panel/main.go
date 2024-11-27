@@ -7,14 +7,11 @@ import (
 	"platformlab/controlpanel/api/middleware"
 	"platformlab/controlpanel/model"
 	"platformlab/controlpanel/service"
+	"platformlab/controlpanel/util"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-)
-
-const (
-	AccessTokenSecretKey string = "supersecret"
 )
 
 func DoMigrations(db *gorm.DB) {
@@ -41,10 +38,10 @@ func CreateExampleProjectsIfNotExists(db *gorm.DB) {
 	}
 }
 
-func CreateDefaultUserIfNotExists(db *gorm.DB) {
+func CreateDefaultUserIfNotExists(db *gorm.DB, email string, password string) {
 	s := service.User{Db: db}
 
-	defaultUser, err := model.NewUser("admin", "test@test.com", "password")
+	defaultUser, err := model.NewUser("root", email, password)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -74,9 +71,15 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	log.Println("trying to load application configuration")
+	configuration, err := util.TryLoadApplicationConfigFromEnvironment()
+	if err != nil {
+		panic(err.Error())
+	}
+
 	router := mux.NewRouter()
 
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(configuration.DatabasePath), &gorm.Config{})
 	if err != nil {
 		panic("failed connecting to database")
 	}
@@ -90,14 +93,14 @@ func main() {
 	println("done")
 
 	println("asseting creation of default user")
-	CreateDefaultUserIfNotExists(db)
+	CreateDefaultUserIfNotExists(db, configuration.RootUserEmail, configuration.RootPassword)
 	println("done")
 
 	projectAPI := api.ProjectRESTApi(db)
 	toolAPI := api.ToolRestAPI(db)
-	authenticationAPI := api.AuthenticationRESTApi(db, AccessTokenSecretKey)
+	authenticationAPI := api.AuthenticationRESTApi(db, configuration.AccessTokenSecret)
+	sessionMiddleware := middleware.SessionMiddleware(configuration.AccessTokenSecret)
 	tableAPI := api.Table{}
-	sessionMiddleware := middleware.SessionMiddleware(AccessTokenSecretKey)
 
 	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

@@ -42,7 +42,7 @@ func (t *Tool) Create(tool *model.Tool) (*model.Tool, error) {
 
 	result = t.Db.Where("acronym = ?", tool.Acronym).First(&maybeExisting)
 	if result.Error == nil {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", tool.Acronym),
 		}
 	}

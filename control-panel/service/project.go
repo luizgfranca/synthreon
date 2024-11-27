@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"platformlab/controlpanel/model"
+	"platformlab/controlpanel/util"
 
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ func (p *Project) FindByAcronym(acronym string) (*model.Project, error) {
 
 	result := p.Db.Where("acronym = ?", acronym).First(&maybeProject)
 	if result.Error != nil {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s not found", acronym),
 		}
 	}
@@ -40,7 +41,7 @@ func (p *Project) Create(project *model.Project) (*model.Project, error) {
 
 	_, err := p.FindByAcronym(project.Acronym)
 	if err == nil {
-		return nil, &model.GenericLogicError{
+		return nil, &util.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", project.Acronym),
 		}
 	}
