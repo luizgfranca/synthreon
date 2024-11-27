@@ -23,11 +23,9 @@ func DoMigrations(db *gorm.DB) {
 	db.AutoMigrate(&model.User{})
 }
 
-func CreateMockProjects(db *gorm.DB) {
+func CreateExampleProjects(db *gorm.DB) {
 	p := []model.Project{
-		{Acronym: "proja", Name: "ProjA", Description: "This is the A mock project"},
-		{Acronym: "proj-b", Name: "Project B", Description: "This is another example project"},
-		{Acronym: "proj-c", Name: "PROJECT C", Description: "This is the C mock project, used to have a basic notion of how this will work and look"},
+		{Acronym: "sandbox", Name: "Sandbox", Description: "Sandbox project to test tool development."},
 	}
 
 	for _, it := range p {
@@ -79,8 +77,8 @@ func main() {
 	DoMigrations(db)
 	println("done")
 
-	println("creating mock projects")
-	CreateMockProjects(db)
+	println("creating example projects")
+	CreateExampleProjects(db)
 	println("done")
 
 	println("asseting creation of default user")
