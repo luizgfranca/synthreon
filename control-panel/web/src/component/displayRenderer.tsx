@@ -37,13 +37,20 @@ export type Field = {
 export type DsiplayRendererProps = {
     definition: DisplayDefinition
     onSumission: (fields: Field[]) => void
+    
+    resetCallback: () => void
 }
 
 export function DisplayRenderer(props: DsiplayRendererProps) {
     switch(props.definition.type) {
         case 'result':
             return (
-                <Result success={props.definition.result?.success ?? false}>{props.definition.result?.message ?? ''}</Result>
+                <Result 
+                    success={props.definition.result?.success ?? false}
+                    onConfirm={() => props.resetCallback()}
+                >
+                    {props.definition.result?.message ?? ''}
+                </Result>
             )
         case 'prompt':
             return (

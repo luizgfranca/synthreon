@@ -16,6 +16,7 @@ function sendEvent(ws: WebSocket, event: ToolEvent) {
 
 export function ToolView(props: ToolViewProps) {
     const [event, setEvent] = useState<ToolEvent | null>(null)
+    const [resetToggle, setResetToggle] = useState<boolean>()
     console.log('e', event)
 
     const accessToken = BackendService.getAccessToken() ?? ''
@@ -49,8 +50,10 @@ export function ToolView(props: ToolViewProps) {
             setEvent(JSON.parse(e.data))
         })
 
+        setResetToggle(false)
+
         return ws
-    }, [props])
+    }, [props, resetToggle])
  
     const sendInputInteraction = (fields: Field[]) => {
         if (props.project && props.tool) {
@@ -66,6 +69,11 @@ export function ToolView(props: ToolViewProps) {
         } else {
             throw new Error('project ant tool should be defined to send an interaction')
         }
+    }
+
+    const reset = () => {
+        console.log('RESET')
+        setResetToggle(true)
     }
 
     if (!props.project || !props.tool) {
@@ -87,7 +95,11 @@ export function ToolView(props: ToolViewProps) {
     return (
         <div className="text-zinc-100 h-screen pt-10">
             <div className="container mx-auto px-4">
-                <DisplayRenderer definition={event.display} onSumission={(fields) => sendInputInteraction(fields)}/>
+                <DisplayRenderer 
+                    definition={event.display} 
+                    onSumission={(fields) => sendInputInteraction(fields)}
+                    resetCallback={() => reset()}
+                />
             </div>
         </div>
     )
