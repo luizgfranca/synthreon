@@ -10,64 +10,36 @@ https://github.com/user-attachments/assets/24318aa1-1f95-48c1-b596-2b44f506e816
 
 
 
-
 ## Status 
 This project is still in the early prototyping stage, please return later for a full proof-of-concept.
 
 
 ## Run the demonstrations
-There are 2 early-stage technology demonstrations you can already run:
+There are 2 early-stage technology demonstrations you can already run, to do it you need to run the server and one of the examples.
 
-### Dependencies
-To run the control panel and look at the examples you need first to set up the dependencies
-You will need:
- - go >= 1.22
+### Server (Docker)
+
+Run the following tommand to build and run a docker container locally:
+
+```bash
+cd control-panel
+docker build -t pl .
+docker run --name pldemo --env-file demo.env --network=host -v "$PWD"/data:/data pl
+```
+
+This will instantiate a docker container running the Control Panel's server
+
+
+### Examples
+
+To run the examples you need first to set up the dependencies. You will need:
  - node.js 22
  - yarn (recommended)
 
-### Setup
 
-Install ts-node globally
-```bash
-npm install -g ts-node
-```
+After that enter http://localhost:5173 using your browser and enter with the test user credentials, they can be found in control-panel/demo.env, but the default ones are test@test.com/password
 
-Go to the control panel's web directory
-```bash
-cd control-panel/web
-```
-
-Install javascript's dependencies
-```bash
-yarn install
-```
-
-Go back to the root directory and enter the node's SDK directory
-```bash
-cd ../..
-cd sdk/node
-```
-
-Install javascript's dependencies
-```bash
-yarn install
-```
-
-### Building and running
-
-First start the backend server:
-```bash
-cd control-panel
-go run .
-```
-
-Open another terminal window and start the frontend development server
-```bash
-cd control-panel/web
-yarn dev
-```
-
-Enter http://localhost:5173 using your browser and select any of the sample projects.
+Select the "Sandbox" project.
 
 Select the "sandbox" tool in the sidebar, and a screen containing the message "Waiting for provider..." will appear.
 
