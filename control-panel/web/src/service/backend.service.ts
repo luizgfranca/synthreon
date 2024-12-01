@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.PL_BACKEND_URL
+const BASE_URL = `http://${window.location.hostname}:8080`
 const STORAGE_SESSION_TOKEN_KEY = 'accessToken'
 
 const DEFAULT_HEADERS = {

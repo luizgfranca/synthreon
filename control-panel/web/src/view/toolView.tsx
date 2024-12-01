@@ -20,9 +20,10 @@ export function ToolView(props: ToolViewProps) {
 
     const accessToken = BackendService.getAccessToken() ?? ''
     
+    const BASE_URL = `http://${window.location.hostname}:8080`
     const ws = useMemo(() => {
         const ws = new WebSocket(
-            `${import.meta.env.PL_BACKEND_URL}/api/tool/client/ws`,
+            `${BASE_URL}/api/tool/client/ws`,
             [ accessToken ]
         )
         ws.addEventListener('open', () => {

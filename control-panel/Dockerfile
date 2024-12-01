@@ -10,4 +10,4 @@ COPY ./web/ .
 RUN mkdir /data
 RUN yarn install
 
-CMD ["/bin/sh", "-c", "/app/controlpanel & yarn dev"]
+CMD ["/bin/sh", "-c", "/app/controlpanel & yarn dev:host"]
