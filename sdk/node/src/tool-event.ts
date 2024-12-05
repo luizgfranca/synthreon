@@ -11,7 +11,11 @@ type DisplayResult = {
     message: string;
 };
 
-type DisplayDefinitionType = 'result' | 'view' | 'prompt' | string
+type DisplayTextBox = {
+    content: string;
+}
+
+type DisplayDefinitionType = 'result' | 'view' | 'prompt' | 'textbox' | string
 
 export type PromptType = 'string'
 
@@ -25,6 +29,7 @@ export type DisplayDefinition = {
     elements?: DisplayElement[];
     result?: DisplayResult;
     prompt?: DisplayPrompt;
+    textBox?: DisplayTextBox;
 };
 
 export type DsiplayRendererProps = {

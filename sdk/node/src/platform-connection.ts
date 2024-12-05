@@ -31,6 +31,7 @@ type ConnectionStatus =
 export type ToolComponents = {
   io: {
     prompt: (description: string, type: PromptType) => Promise<string>;
+    textBox: (content: string) => Promise<void>
   };
 };
 
@@ -235,10 +236,39 @@ export class PlatformConnection {
     };
   }
 
+  #getTextBoxFunction(
+    messageBus: EventEmitter
+  ): (content: string) => Promise<void> {
+    return (content: string) => {
+      return new Promise((resolve, reject) => {
+        console.debug("executing textBox dispatch", { content });
+        const display: DisplayDefinition = {
+          type: "textbox",
+          textBox: {
+            content
+          }
+        };
+
+        console.debug("sending display definition to messageBus", display);
+        messageBus.emit("display", display);
+
+        messageBus.on("display", (definition) => {
+          console.debug("[probe] definition received", definition);
+        });
+
+        messageBus.on("input", (input: EventInput) => {
+          console.log("input received by prompt handler: ", input);
+          resolve();
+        });
+      })
+    }
+  }
+
   #getToolComponents(messageBus: EventEmitter): ToolComponents {
     return {
       io: {
         prompt: this.#getPromptFunction(messageBus),
+        textBox: this.#getTextBoxFunction(messageBus)
       },
     };
   }

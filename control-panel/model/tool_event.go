@@ -55,6 +55,10 @@ type DisplayPrompt struct {
 	Type  DisplayPromptType `json:"type"`
 }
 
+type DisplayTextBox struct {
+	Content string `json:"content"`
+}
+
 // TODO: thinking about this better, maybe i dont need the result,
 //
 //	should try to emulate it with specific elements
@@ -64,9 +68,11 @@ type DisplayDefniition struct {
 
 	// if type=(view or display) Elements should be present
 	// if type=result Result should be present
+	// if type=textbox TextBox should be present
 	Elements *[]DisplayElement `json:"elements"`
 	Result   *DisplayResult    `json:"result"`
 	Prompt   *DisplayPrompt    `json:"prompt"`
+	TextBox  *DisplayTextBox   `json:"textBox"`
 }
 
 type InputField struct {

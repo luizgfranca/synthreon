@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Result } from "./result";
 import { Prompt } from "./prompt";
+import { TextBox } from "./textBox";
 
 type DisplayElement = {
     type: string;
@@ -20,13 +21,18 @@ type DisplayPrompt = {
     type: string;
 }
 
-type DisplayDefinitionType = 'result' | 'view' | 'prompt' | string
+type DisplayTextBox = {
+    content: string
+}
+
+type DisplayDefinitionType = 'result' | 'view' | 'prompt' | 'textbox' | string
 
 export type DisplayDefinition = {
     type: DisplayDefinitionType;
     elements?: DisplayElement[];
     result?: DisplayResult;
     prompt?: DisplayPrompt;
+    textBox?: DisplayTextBox;
 };
 
 export type Field = {
@@ -61,6 +67,14 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
                         value
                     }])}
                 />
+            )
+        case 'textbox':
+            return (
+                <TextBox
+                    onConfirm={() => props.onSumission([])}
+                >
+                    {props.definition.textBox?.content ?? ''}
+                </TextBox>
             )
     }
 
