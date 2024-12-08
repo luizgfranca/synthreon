@@ -174,7 +174,7 @@ export class PlatformConnection {
       class: "announcement",
       type: "provider",
       project: "proj-x",
-      tool: "tool-y",
+      tool: "sandbox",
       provider: 1,
     });
 

@@ -59,8 +59,8 @@ ws.on('open', () => {
     ws.send(JSON.stringify({
         "class": "announcement",
         "type": "provider",
-        "project": "proj-x",
-        "tool": "tool-y",
+        "project": "sandbox",
+        "tool": "sandbox",
         "provider": 1
     }))
 })
