@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/a6ccb9be-b8a5-43b0-a4d2-37e543baf9ff
 
 
 ## Status 
-This project is still in the early prototyping stage, please return later for a full proof-of-concept.
+This project is still in the early prototyping stage and is currently just a proof-of-concept of the idea, please return later for a MVP.
 
 
 ## Run the demonstrations
