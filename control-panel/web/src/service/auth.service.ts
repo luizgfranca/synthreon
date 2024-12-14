@@ -10,7 +10,7 @@ const BASE_URL = `http://${window.location.hostname}:8080`
 
 function tryLogin(body: LoginRequestDto) {
     return new Promise((resolve, reject) => {
-        fetch(`${BASE_URL}/api/auth/login`, {
+        fetch(`${BASE_URL}/auth/login`, {
             method: 'POST',
             body: JSON.stringify(body),
             headers: {
