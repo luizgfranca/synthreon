@@ -48,9 +48,9 @@ v0.0|{
     "tool": "tool-y",
     "context_id": UUID,
     "display": {
-        "type": "result",
-        "result": {
-            "status": "success" | "error" | "undetermined"
+        "type": "information",
+        "information": {
+            "type": "success" | "error" | "undetermined"
             "message": "Hello World"
         }
     }

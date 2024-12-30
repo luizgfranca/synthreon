@@ -3,16 +3,16 @@ provider to server
 v0.0|{
     "type": "handshake/request",
     "project": "proj-x",
-    "announcement_id": UUID
+    "handshake_id": UUID
 }
 ```
 
 server to provider
 ```jsonc
 v0.0|{
-    "type": "handshake/accept",
+    "type": "handshake/ack",
     "project": "proj-x",
-    "announcement_id": UUID,
+    "handshake_id": UUID,
     "provider_id": UUID
 }
 ```
@@ -21,9 +21,9 @@ v0.0|{
 server to provider
 ```jsonc
 v0.0|{
-    "type": "handshake/noaccept",
+    "type": "handshake/nack",
     "project": "proj-x",
-    "announcement_id": UUID,
+    "handshake_id": UUID,
     "reason": "reason_code"
 }
 ```
@@ -35,7 +35,7 @@ v0.0|{
     "type": "announcement/handler",
     "project": "proj-x",
     "tool": "tool-y",
-    "announcement_id": UUID,
+    "handshake_id": UUID,
     "provider_id": UUID
 }
 ```
@@ -46,7 +46,7 @@ v0.0|{
     "class": "announcement/ack",
     "project": "proj-x",
     "tool": "tool-y",
-    "announcement_id": UUID,
+    "handshake_id": UUID,
     "provider_id": UUID,
     "handler_id": UUID
 }
@@ -59,7 +59,7 @@ v0.0|{
     "class": "announcement/nack",
     "project": "proj-x",
     "tool": "tool-y",
-    "announcement_id": UUID,
+    "handshake_id": UUID,
     "provider_id": UUID,
     "reason": "nack_reason_code"
 }

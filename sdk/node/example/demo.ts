@@ -1,7 +1,6 @@
 import { PlatformConnection } from "../src/platform-connection";
 
 const connection = new PlatformConnection({
-    // endpoint: 'ws://192.168.1.5:8080/api/tool/provider/ws',
     endpoint: 'ws://localhost:8080/api/tool/provider/ws',
     credentials: {
         username: 'test@test.com',
@@ -13,8 +12,8 @@ const connection = new PlatformConnection({
             'string'
         )
 
-        if (input.toLowerCase() === 'ping') {
-            return 'pong'
+        if(input.toLowerCase() === 'ping') {
+            return 'pong!'
         }
 
         throw '...'

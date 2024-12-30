@@ -27,6 +27,7 @@ provider to server
 ```jsonc
 v0.0|{
     "type": "command/display",
+    "project": "project-x",
     "tool": "tool-y",
     "provider_id": UUID,
     "handler_id": UUID,
@@ -122,7 +123,7 @@ v0.0|{
     "context_id": UUID,
     "display": {
         "type": "result",
-        "result": {
+        "information": {
             "status": "success",
             "message": "pong"
         }
