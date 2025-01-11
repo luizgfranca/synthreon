@@ -2,7 +2,8 @@ package usermodule
 
 import (
 	"fmt"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+
+	commonmodule "platformlab/controlpanel/modules/common"
 
 	"gorm.io/gorm"
 )
@@ -16,7 +17,7 @@ func (u *UserService) FindByEmail(email string) (*User, error) {
 
 	result := u.Db.Where("email = ?", email).First(&maybeUser)
 	if result.Error != nil {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("user with email %s not found", email),
 		}
 	}
@@ -32,7 +33,7 @@ func (u *UserService) VerifyAuthenticationCredentials(email *string, password *s
 
 	isValid := verifyPassword(password, &user.Hash)
 	if !isValid {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("invalid password for user %s", *email),
 		}
 	}
@@ -45,7 +46,7 @@ func (u *UserService) Create(user *User) (*User, error) {
 
 	_, err := u.FindByEmail(user.Email)
 	if err == nil {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with email %s already exists", user.Email),
 		}
 	}

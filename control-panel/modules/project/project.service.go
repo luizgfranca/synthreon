@@ -2,7 +2,7 @@ package projectmodule
 
 import (
 	"fmt"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 	toolmodule "platformlab/controlpanel/modules/tool"
 
 	"gorm.io/gorm"
@@ -28,7 +28,7 @@ func (p *ProjectService) FindByAcronym(acronym string) (*Project, error) {
 
 	result := p.Db.Where("acronym = ?", acronym).First(&maybeProject)
 	if result.Error != nil {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s not found", acronym),
 		}
 	}
@@ -41,7 +41,7 @@ func (p *ProjectService) Create(project *Project) (*Project, error) {
 
 	_, err := p.FindByAcronym(project.Acronym)
 	if err == nil {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", project.Acronym),
 		}
 	}

@@ -2,7 +2,7 @@ package sessionmodule
 
 import (
 	"fmt"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -51,17 +51,17 @@ func (s *SessionService) DecodeToken(token_str string) (*Session, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, &genericmodule.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &commonmodule.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok {
-		return nil, &genericmodule.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &commonmodule.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	name, ok := claims["name"].(string)
 	if !ok {
-		return nil, &genericmodule.GenericLogicError{Message: "unable to extract claims"}
+		return nil, &commonmodule.GenericLogicError{Message: "unable to extract claims"}
 	}
 
 	session := Session{

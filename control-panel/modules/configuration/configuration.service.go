@@ -2,7 +2,7 @@ package configurationmodule
 
 import (
 	"os"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 )
 
 type ConfigurationService struct {
@@ -15,22 +15,22 @@ type ConfigurationService struct {
 func TryLoadApplicationConfigFromEnvironment() (*ConfigurationService, error) {
 	secret := os.Getenv("ACCESS_TOKEN_SECRET_KEY")
 	if secret == "" {
-		return nil, &genericmodule.GenericLogicError{Message: "[configuration] ACCESS_TOKEN_SECRET_KEY required"}
+		return nil, &commonmodule.GenericLogicError{Message: "[configuration] ACCESS_TOKEN_SECRET_KEY required"}
 	}
 
 	rootUserEmail := os.Getenv("ROOT_EMAIL")
 	if rootUserEmail == "" {
-		return nil, &genericmodule.GenericLogicError{Message: "[configuration] ROOT_EMAIL required"}
+		return nil, &commonmodule.GenericLogicError{Message: "[configuration] ROOT_EMAIL required"}
 	}
 
 	rootUserPassword := os.Getenv("ROOT_PASSWORD")
 	if rootUserPassword == "" {
-		return nil, &genericmodule.GenericLogicError{Message: "[configuration] ROOT_PASSWORD required"}
+		return nil, &commonmodule.GenericLogicError{Message: "[configuration] ROOT_PASSWORD required"}
 	}
 
 	database := os.Getenv("DATABASE")
 	if database == "" {
-		return nil, &genericmodule.GenericLogicError{Message: "[configuration] DATABASE required"}
+		return nil, &commonmodule.GenericLogicError{Message: "[configuration] DATABASE required"}
 	}
 
 	return &ConfigurationService{

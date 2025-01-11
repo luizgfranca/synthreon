@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"platformlab/controlpanel/model"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 	"strconv"
 	"sync"
 	"time"
@@ -42,7 +42,7 @@ func (m *ClientMgr) SendEvent(client uint, e *model.ToolEvent) error {
 	log.Print("[ToolClient] clents: ", m.clients)
 	if len(m.clients) <= int(client) {
 		m.clientAdditionMutex.Unlock()
-		return &genericmodule.GenericLogicError{Message: "client not found"}
+		return &commonmodule.GenericLogicError{Message: "client not found"}
 	}
 	m.clientAdditionMutex.Unlock()
 

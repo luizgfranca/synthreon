@@ -2,7 +2,8 @@ package toolmodule
 
 import (
 	"fmt"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+
+	commonmodule "platformlab/controlpanel/modules/common"
 
 	"gorm.io/gorm"
 )
@@ -26,11 +27,11 @@ func (t *ToolService) Create(tool *Tool) (*Tool, error) {
 	var result *gorm.DB
 	var maybeExisting *Tool
 
-	genericmodule.Probe(tool.Acronym)
+	commonmodule.Probe(tool.Acronym)
 
 	result = t.Db.Where("acronym = ?", tool.Acronym).First(&maybeExisting)
 	if result.Error == nil {
-		return nil, &genericmodule.GenericLogicError{
+		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", tool.Acronym),
 		}
 	}

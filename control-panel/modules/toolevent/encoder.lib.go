@@ -3,7 +3,7 @@ package tooleventmodule
 import (
 	"encoding/json"
 	"log"
-	"platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 	"strings"
 )
 
@@ -38,4 +38,14 @@ func ParseEventString(input *string) (*ToolEvent, error) {
 	}
 
 	return nil, &commonmodule.GenericLogicError{Message: "unknown event version"}
+}
+
+func WriteV0EventString(event *ToolEvent) (*string, error) {
+	dataStr, err := json.Marshal(event)
+	if err != nil {
+		return nil, err
+	}
+
+	eventStr := "v0.0|" + string(dataStr)
+	return &eventStr, nil
 }

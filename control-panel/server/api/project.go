@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	genericmodule "platformlab/controlpanel/modules/commonmodule"
+	commonmodule "platformlab/controlpanel/modules/common"
 	projectmodule "platformlab/controlpanel/modules/project"
 	toolmodule "platformlab/controlpanel/modules/tool"
 	api "platformlab/controlpanel/server/api/dto"
@@ -22,12 +22,12 @@ func (p *Project) getProjectParameter(r *http.Request) (*projectmodule.Project, 
 	params := mux.Vars(r)
 	projectAcronym := params["project"]
 	if projectAcronym == "" {
-		return nil, &genericmodule.GenericLogicError{Message: "No project found in request"}
+		return nil, &commonmodule.GenericLogicError{Message: "No project found in request"}
 	}
 
 	project, err := p.projectService.FindByAcronym(projectAcronym)
 	if err != nil {
-		return nil, &genericmodule.GenericLogicError{Message: "Project not found"}
+		return nil, &commonmodule.GenericLogicError{Message: "Project not found"}
 	}
 
 	return project, nil
@@ -62,7 +62,7 @@ func (p *Project) CreateProject() func(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(ErrorMessage{Message: err.Error()})
 			return
 		}
-		genericmodule.Probe(input)
+		commonmodule.Probe(input)
 
 		if !input.IsValid() {
 			w.WriteHeader(http.StatusBadRequest)
