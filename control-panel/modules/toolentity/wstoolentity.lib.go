@@ -4,11 +4,14 @@ import (
 	"log"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
 	"sync"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type WebsocketToolEntity struct {
+	id                   string
 	connection           *websocket.Conn
 	chSend               chan []byte
 	chRecv               chan string
@@ -21,16 +24,20 @@ type WebsocketToolEntity struct {
 
 func NewWebsocketToolEntity(connection *websocket.Conn) *WebsocketToolEntity {
 	e := WebsocketToolEntity{
+		id:                   uuid.NewString(),
 		connection:           connection,
 		chSend:               make(chan []byte),
 		chRecv:               make(chan string),
 		done:                 make(chan bool),
 		activeHandlerThreads: sync.WaitGroup{},
 	}
+	e.log("new connection")
 	return &e
 }
 
 func (e *WebsocketToolEntity) StartHandler() error {
+	e.log("starting handlers")
+
 	e.activeHandlerThreads.Add(2)
 	go e.messageSenderThread()
 	go e.messageReceiverThread()
@@ -58,25 +65,35 @@ func (e *WebsocketToolEntity) OnDisconnect(handler func()) {
 }
 
 func (e *WebsocketToolEntity) Close() {
-	e.done <- false
-	e.activeHandlerThreads.Wait()
+	e.log("draining connections")
+	e.done <- true
+	// e.done <- true
 	e.connection.Close()
+	e.activeHandlerThreads.Wait()
+	e.log("closing websocket")
+}
+
+func (e *WebsocketToolEntity) log(v ...any) {
+	x := append([]any{"[WebsocketToolEntity-" + e.id + "]"}, v...)
+
+	log.Println(x...)
 }
 
 func (e *WebsocketToolEntity) messageSenderThread() {
-	log.Print("[WebsocketToolEnity] starting messageSender loop")
+	e.log("starting messageSender loop")
 
 	for {
-		log.Print("[WebsocketToolEnity] waiting for new messages")
+		e.log("waiting for new messages")
 
 		select {
 		case <-e.done:
+			e.log("stopping sender")
 			e.activeHandlerThreads.Done()
 			return
 		case data := <-e.chSend:
 			err := e.connection.WriteMessage(websocket.TextMessage, data)
 			if err != nil {
-				log.Print("[WebsocketToolEnity] websocket message sending error: ", err.Error())
+				e.log("websocket message sending error: ", err.Error())
 				return
 			}
 		}
@@ -84,7 +101,7 @@ func (e *WebsocketToolEntity) messageSenderThread() {
 }
 
 func (e *WebsocketToolEntity) messageReceiverThread() {
-	log.Print("[WebsocketToolEntity] starting messageReceiver loop")
+	e.log("starting messageReceiver loop")
 	if e.eventReceivedCallback == nil {
 		log.Fatal("[WebsocketToolEntity] Assumption violation: No event handler added for WebSocketToolEntity.")
 	}
@@ -92,19 +109,22 @@ func (e *WebsocketToolEntity) messageReceiverThread() {
 	for {
 		select {
 		case <-e.done:
+			e.log("stopping receiver")
+			e.activeHandlerThreads.Done()
 			return
 		default:
 			// continue loop if not marked as done
 		}
 
-		log.Print("[WebsocketToolEntity] waiting for messages")
+		e.log("waiting for messages")
+		e.connection.SetReadDeadline(time.Now().Add(time.Second))
 		msgtype, message, err := e.connection.ReadMessage()
-		log.Print("[WebsocketToolEntity] message received")
+		e.log("message received")
 		if err != nil {
-			log.Print("[WebsocketToolEntity] websocket message receiving error: ", err.Error())
+			e.log("websocket message receiving error: ", err.Error())
 
 			if _, ok := err.(*websocket.CloseError); ok {
-				log.Print("[WebsocketToolEntity] websocket conneciton closed")
+				e.log("websocket conneciton closed")
 				if e.disconnectedCallback != nil {
 					// TODO: should think of a way to pass down more information
 					// 		 about the reason of the disconnection
@@ -115,18 +135,20 @@ func (e *WebsocketToolEntity) messageReceiverThread() {
 		}
 
 		if msgtype != websocket.TextMessage {
-			log.Print("[WebsocketToolEntity] unexpeted message type, type sould be a textMessage")
+			e.log("unexpeted message type, type sould be a textMessage")
 			break
 		}
 
 		messageString := string(message)
+
+		// TODO: when the event is invalid, should i just drop it like this?
 		event, err := tooleventmodule.ParseEventString(&messageString)
 		if err != nil {
-			log.Print("[WebsocketToolEntity] websocket message payload parsing error: ", err.Error())
+			e.log("websocket message payload parsing error: ", err.Error())
 			break
 		}
 
-		log.Print("[WebsocketToolEntity] event received: ", event)
+		e.log("event received: ", event)
 		if e.eventReceivedCallback == nil {
 			log.Fatal("[WebsocketToolEntity] Assumption violation: No event handler added for WebSocketToolEntity.")
 		}
