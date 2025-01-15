@@ -73,3 +73,16 @@ func (t *ProjectService) FindTools(project *Project) *[]toolmodule.Tool {
 
 	return &tools
 }
+
+func (t *ProjectService) FindToolByAcronym(project *Project, acronym string) (*toolmodule.Tool, error) {
+	var tool *toolmodule.Tool
+
+	result := t.Db.Where("projectId = ? and acronym = ?", project.ID, acronym).First(&tool)
+	if result.Error != nil {
+		return nil, &commonmodule.GenericLogicError{
+			Message: fmt.Sprintf("element with acronym %s not found", acronym),
+		}
+	}
+
+	return tool, nil
+}

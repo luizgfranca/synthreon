@@ -14,7 +14,7 @@ import (
 // made this interface instead of a reference to make it easy to test it separately
 type Manager interface {
 	FindProject(acronym string) (*projectmodule.Project, error)
-	FindTool(acronym string) (*toolmodule.Tool, error)
+	FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
 
 	DistributeEvent(e *tooleventmodule.ToolEvent)
 }
@@ -264,7 +264,7 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 		return
 	}
 
-	tool, err := p.manager.FindTool(e.Tool)
+	tool, err := p.manager.FindTool(p.Project, e.Tool)
 	if err != nil {
 		p.log("error: provider tried to announce invalid tool", e.Tool)
 		nack := tooleventmodule.ToolEvent{
@@ -297,6 +297,28 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 	p.sendEvent(&ack)
 }
 
+// TODO: there are not tests to stress these validations yet, i should create it later
+func (p *Provider) isEventValidForDistribution(e *tooleventmodule.ToolEvent) bool {
+	if !(e.Project == p.Project.Acronym &&
+		e.ProviderId == p.ID &&
+		e.HandlerId != "") {
+		return false
+	}
+
+	for _, it := range p.handlers {
+		if it.ID == e.HandlerId {
+			return e.Tool == it.Tool.Acronym
+		}
+	}
+
+	return false
+}
+
 func (p *Provider) handleActiveProviderEvent(e *tooleventmodule.ToolEvent) {
+	if !p.isEventValidForDistribution(e) {
+		// TODO: just drops for now, maybe it should have a better behavior
+		return
+	}
+
 	p.manager.DistributeEvent(e)
 }

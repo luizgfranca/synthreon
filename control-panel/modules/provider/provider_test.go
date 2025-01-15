@@ -14,6 +14,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,10 +29,24 @@ type negotionationTest struct {
 	ACK     bool
 }
 
+// TODO: make tests with
+// - multiple handlers
+// - event concurrency
+// - events in for incorrect states
 func TestProviderRegistrationRules(t *testing.T) {
 	exampleValidHandshake := tooleventmodule.ToolEvent{
 		Type:    tooleventmodule.EventTypeHandshakeRequest,
 		Project: "validproject",
+	}
+
+	exampleEventToDistribute := tooleventmodule.ToolEvent{
+		Type:        tooleventmodule.EventTypeCommandFinish,
+		Project:     "validproject",
+		Tool:        "validtool",
+		ProviderId:  "", // to be filled
+		HandlerId:   "", // to be filled
+		ContextId:   uuid.NewString(),
+		ExecutionId: uuid.NewString(),
 	}
 
 	handshakeBaseTests := []negotionationTest{
@@ -121,7 +137,7 @@ func TestProviderRegistrationRules(t *testing.T) {
 			t.Error("null websocket entity after creation")
 		}
 
-		provider = NewProvider(manager, entity)
+		provider = NewProvider(&manager, entity)
 	}))
 	defer s.Close()
 
@@ -288,6 +304,34 @@ func TestProviderRegistrationRules(t *testing.T) {
 				t.Error("most recent handler tool does not match. expected:", it.Event.Tool, "got:", handler.Tool)
 				return
 			}
+
+			fmt.Println("proceeding with a command to distribute")
+
+			command := exampleEventToDistribute
+			command.ProviderId = response.ProviderId
+			command.HandshakeId = response.HandshakeId
+			command.HandlerId = response.HandlerId
+
+			msg, err = tooleventmodule.WriteV0EventString(&command)
+			if err != nil {
+				t.Fatal("internal test error: unable to encode event: ", it.Event)
+			}
+
+			ws.WriteMessage(websocket.TextMessage, []byte(*msg))
+
+			// just enough time to be processed
+			time.Sleep(100 * time.Millisecond)
+
+			distrubutedCount := len(manager.DistributedEvents)
+			if distrubutedCount == 0 {
+				t.Error("no event was distributed until now, but expected command have been")
+				return
+			}
+
+			lastDistributed := manager.DistributedEvents[distrubutedCount-1]
+			if !cmp.Equal(*lastDistributed, command) {
+				t.Error("last distributed event differs from sent event", cmp.Diff(*lastDistributed, command))
+			}
 		})
 	}
 
@@ -298,12 +342,12 @@ type testManager struct {
 }
 
 // DistributeEvent implements Manager.
-func (t testManager) DistributeEvent(e *tooleventmodule.ToolEvent) {
+func (t *testManager) DistributeEvent(e *tooleventmodule.ToolEvent) {
 	t.DistributedEvents = append(t.DistributedEvents, e)
 }
 
 // FindProject implements Manager.
-func (t testManager) FindProject(acronym string) (*projectmodule.Project, error) {
+func (t *testManager) FindProject(acronym string) (*projectmodule.Project, error) {
 	if acronym == "validproject" {
 		return &projectmodule.Project{
 			ID:          0,
@@ -317,7 +361,7 @@ func (t testManager) FindProject(acronym string) (*projectmodule.Project, error)
 }
 
 // FindTool implements Manager.
-func (t testManager) FindTool(acronym string) (*toolmodule.Tool, error) {
+func (t *testManager) FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error) {
 	if acronym == "validtool" {
 		return &toolmodule.Tool{
 			ID:          0,
