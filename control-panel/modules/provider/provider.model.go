@@ -299,6 +299,10 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 
 // TODO: there are not tests to stress these validations yet, i should create it later
 func (p *Provider) isEventValidForDistribution(e *tooleventmodule.ToolEvent) bool {
+	if !e.IsCommand() {
+		return false
+	}
+
 	if !(e.Project == p.Project.Acronym &&
 		e.ProviderId == p.ID &&
 		e.HandlerId != "") {
