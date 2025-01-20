@@ -362,6 +362,6 @@ func TestBasicProviderManagerBehavior(t *testing.T) {
 	}
 }
 
-func (t testOrchestrator) ForwardEvent(e *tooleventmodule.ToolEvent) {
+func (t testOrchestrator) ForwardEventToClient(e *tooleventmodule.ToolEvent) {
 	lastForwardedEvent = e
 }

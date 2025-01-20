@@ -10,7 +10,7 @@ import (
 )
 
 type Orchestrator interface {
-	ForwardEvent(e *tooleventmodule.ToolEvent)
+	ForwardEventToClient(e *tooleventmodule.ToolEvent)
 }
 
 // FIXME: add project and tool deregistration handling
@@ -53,7 +53,7 @@ func (p *ProviderManagerService) DistributeEvent(e *tooleventmodule.ToolEvent) {
 	e.HandshakeId = ""
 	e.ExecutionId = ""
 
-	p.orchestrator.ForwardEvent(e)
+	p.orchestrator.ForwardEventToClient(e)
 }
 
 // RegisterProviderProjectAndTool implements Manager.
