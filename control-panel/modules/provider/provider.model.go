@@ -2,6 +2,7 @@ package providermodule
 
 import (
 	"log"
+	commonmodule "platformlab/controlpanel/modules/common"
 	projectmodule "platformlab/controlpanel/modules/project"
 	toolmodule "platformlab/controlpanel/modules/tool"
 	"platformlab/controlpanel/modules/toolentity"
@@ -11,11 +12,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// made this interface instead of a reference to make it easy to test it separately
+// TODO: made this interface instead of a reference to make it easy to test it separately
 type Manager interface {
 	FindProject(acronym string) (*projectmodule.Project, error)
 	FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
 
+	RegisterProviderProjectAndTool(m *ProviderToolMapping)
 	DistributeEvent(e *tooleventmodule.ToolEvent)
 }
 
@@ -28,6 +30,7 @@ const (
 	ProviderStatusInactive     ProviderStatus = "INACTIVE"
 )
 
+// FIXME: SHOULD HANDLE PROVIDER DISCONNECTION
 type Provider struct {
 	ID string
 
@@ -44,6 +47,8 @@ type Provider struct {
 	// 		 to avoid half-writes later
 	statusLock sync.Mutex
 	status     ProviderStatus
+
+	contextExecutionMap sync.Map
 
 	manager Manager
 }
@@ -109,9 +114,24 @@ func (p *Provider) log(v ...any) {
 	log.Println(x...)
 }
 
-func (p *Provider) sendEvent(e *tooleventmodule.ToolEvent) (success bool) {
+func (p *Provider) SendEvent(e *tooleventmodule.ToolEvent) (success bool) {
 	p.log("sending event: ", e)
-	err := p.entity.SendEvent(e)
+
+	err := p.fillEventHandler(e)
+	if err != nil {
+		p.log("handler setup error", err.Error())
+		return false
+	}
+
+	err = p.fillEventExecutionIfApplicable(e)
+	if err != nil {
+		p.log("handler setup error", err.Error())
+		return false
+	}
+
+	e.ProviderId = p.ID
+
+	err = p.entity.SendEvent(e)
 	if err != nil {
 		p.log("error sending event", err.Error())
 		p.Disconnect()
@@ -137,6 +157,7 @@ func (p *Provider) completeHandshake(project *projectmodule.Project) {
 
 func (p *Provider) createHandler(t *toolmodule.Tool) *Handler {
 	handler := NewHandler(t)
+	p.log("registering handler: ", handler)
 
 	p.handlerWriteLock.Lock()
 	defer p.handlerWriteLock.Unlock()
@@ -144,6 +165,50 @@ func (p *Provider) createHandler(t *toolmodule.Tool) *Handler {
 	p.handlers = append(p.handlers, handler)
 
 	return &handler
+}
+
+// fillEventHandler: adds handler settings to event IN-PLACE.
+//
+// TODO: should use a map for this
+func (p *Provider) fillEventHandler(e *tooleventmodule.ToolEvent) error {
+	if e.IsHandshake() || e.IsAnnouncement() {
+		return nil
+	}
+
+	if e.Project != p.Project.Acronym {
+		log.Fatalln("[Provider] event was sent to wrong provider")
+	}
+
+	for _, handler := range p.handlers {
+		if e.Tool == handler.Tool.Acronym {
+			e.HandlerId = handler.ID
+			return nil
+		}
+	}
+
+	return &commonmodule.GenericLogicError{Message: "handler " + e.HandlerId + " not found"}
+}
+
+func (p *Provider) fillEventExecutionIfApplicable(e *tooleventmodule.ToolEvent) error {
+	if e.Type == tooleventmodule.EventTypeInteractionOpen ||
+		e.IsAnnouncement() || e.IsHandshake() {
+		return nil
+	}
+	p.log("loading event executionId for context", e.ContextId)
+
+	v, ok := p.contextExecutionMap.Load(e.ContextId)
+	if !ok {
+		return &commonmodule.GenericLogicError{Message: "expected execution not found for context" + e.ContextId}
+	}
+
+	id, ok := v.(string)
+	if !ok {
+		panic("expected map value type to be string")
+	}
+
+	e.ExecutionId = id
+
+	return nil
 }
 
 // FIXME: i should handle when the provider tries to reconnect here
@@ -208,7 +273,7 @@ func (p *Provider) handleHandshakeEvent(e *tooleventmodule.ToolEvent) {
 			Reason:  "project.invalid",
 		}
 
-		if ok := p.sendEvent(&nack); !ok {
+		if ok := p.SendEvent(&nack); !ok {
 			p.Disconnect()
 			return
 		}
@@ -223,9 +288,10 @@ func (p *Provider) handleHandshakeEvent(e *tooleventmodule.ToolEvent) {
 		HandshakeId: p.handshakeId,
 		ProviderId:  p.ID,
 	}
-	p.sendEvent(&ack)
+	p.SendEvent(&ack)
 }
 
+// FIXME: should deal with duplicate handler registration
 func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 	if p.Status() != ProviderStatusActive {
 		panic("unexpected provider status for handleHandshakeEvent")
@@ -256,7 +322,7 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 			ProviderId:  p.ID,
 			Reason:      "project.match.none",
 		}
-		if ok := p.sendEvent(&nack); !ok {
+		if ok := p.SendEvent(&nack); !ok {
 			p.Disconnect()
 			return
 		}
@@ -275,7 +341,7 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 			ProviderId:  p.ID,
 			Reason:      "tool.invalid",
 		}
-		if ok := p.sendEvent(&nack); !ok {
+		if ok := p.SendEvent(&nack); !ok {
 			p.log("not ok")
 			p.Disconnect()
 			return
@@ -285,6 +351,14 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 	}
 
 	created := p.createHandler(tool)
+
+	p.log("requesting manager to register provider for project and tool")
+	p.manager.RegisterProviderProjectAndTool(&ProviderToolMapping{
+		Provider: p,
+		Project:  p.Project,
+		Tool:     tool,
+	})
+
 	ack := tooleventmodule.ToolEvent{
 		Type:        tooleventmodule.EventTypeAnnouncementACK,
 		Project:     p.Project.Acronym,
@@ -294,7 +368,7 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 		HandlerId:   created.ID,
 	}
 
-	p.sendEvent(&ack)
+	p.SendEvent(&ack)
 }
 
 // TODO: there are not tests to stress these validations yet, i should create it later
@@ -320,8 +394,20 @@ func (p *Provider) isEventValidForDistribution(e *tooleventmodule.ToolEvent) boo
 
 func (p *Provider) handleActiveProviderEvent(e *tooleventmodule.ToolEvent) {
 	if !p.isEventValidForDistribution(e) {
+		p.log("[DROPPING] invalid event received")
 		// TODO: just drops for now, maybe it should have a better behavior
 		return
+	}
+
+	if e.Type != tooleventmodule.EventTypeCommandFinish {
+		existingExecutionId, loaded := p.contextExecutionMap.LoadOrStore(e.ContextId, e.ExecutionId)
+		if loaded && existingExecutionId != e.ExecutionId {
+			p.log("[DROPPING] unexpected behavior: exeuction is different from previous in context")
+			// TODO: just drops for now, maybe it should have a better behavior
+			return
+		}
+	} else {
+		p.contextExecutionMap.Delete(e.ContextId)
 	}
 
 	p.manager.DistributeEvent(e)

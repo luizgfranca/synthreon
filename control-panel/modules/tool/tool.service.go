@@ -2,6 +2,7 @@ package toolmodule
 
 import (
 	"fmt"
+	"log"
 
 	commonmodule "platformlab/controlpanel/modules/common"
 
@@ -24,6 +25,7 @@ func (t *ToolService) FindAll() *[]Tool {
 }
 
 func (t *ToolService) Create(tool *Tool) (*Tool, error) {
+	log.Println("toolservice.create")
 	var result *gorm.DB
 	var maybeExisting *Tool
 
@@ -31,11 +33,13 @@ func (t *ToolService) Create(tool *Tool) (*Tool, error) {
 
 	result = t.Db.Where("acronym = ?", tool.Acronym).First(&maybeExisting)
 	if result.Error == nil {
+		log.Println("already exists", maybeExisting)
 		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s already exists", tool.Acronym),
 		}
 	}
 
+	log.Println("creating tool", tool)
 	result = t.Db.Create(tool)
 	if result.Error != nil {
 		return nil, result.Error

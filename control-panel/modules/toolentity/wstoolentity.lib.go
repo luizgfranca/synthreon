@@ -50,6 +50,7 @@ func (e *WebsocketToolEntity) OnEventReceived(handler func(event *tooleventmodul
 }
 
 func (e *WebsocketToolEntity) SendEvent(event *tooleventmodule.ToolEvent) error {
+	e.log("preparing event to be sent", event)
 	data, err := tooleventmodule.WriteV0EventString(event)
 	if err != nil {
 		return err
@@ -91,6 +92,7 @@ func (e *WebsocketToolEntity) messageSenderThread() {
 			e.activeHandlerThreads.Done()
 			return
 		case data := <-e.chSend:
+			e.log("sending message: ", string(data))
 			err := e.connection.WriteMessage(websocket.TextMessage, data)
 			if err != nil {
 				e.log("websocket message sending error: ", err.Error())

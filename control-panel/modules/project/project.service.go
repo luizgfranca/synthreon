@@ -66,7 +66,7 @@ func (p *ProjectService) Create(project *Project) (*Project, error) {
 func (t *ProjectService) FindTools(project *Project) *[]toolmodule.Tool {
 	var tools []toolmodule.Tool
 
-	result := t.Db.Find(&tools).Where("projectId = ?", project.ID)
+	result := t.Db.Find(&tools).Where("project_id = ?", project.ID)
 	if result.Error != nil {
 		panic(fmt.Sprintf("unable to query database: %s", result.Error.Error()))
 	}
@@ -77,7 +77,7 @@ func (t *ProjectService) FindTools(project *Project) *[]toolmodule.Tool {
 func (t *ProjectService) FindToolByAcronym(project *Project, acronym string) (*toolmodule.Tool, error) {
 	var tool *toolmodule.Tool
 
-	result := t.Db.Where("projectId = ? and acronym = ?", project.ID, acronym).First(&tool)
+	result := t.Db.Where("project_id = ? and acronym = ?", project.ID, acronym).First(&tool)
 	if result.Error != nil {
 		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s not found", acronym),

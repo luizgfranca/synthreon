@@ -346,6 +346,11 @@ func (t *testManager) DistributeEvent(e *tooleventmodule.ToolEvent) {
 	t.DistributedEvents = append(t.DistributedEvents, e)
 }
 
+// RegisterProviderProjectAndTool implements Manager.
+func (t *testManager) RegisterProviderProjectAndTool(m *ProviderToolMapping) {
+	log.Printf("[testManager] should be registering project and tool (%s, %s)", m.Project.Acronym, m.Tool.Acronym)
+}
+
 // FindProject implements Manager.
 func (t *testManager) FindProject(acronym string) (*projectmodule.Project, error) {
 	if acronym == "validproject" {
