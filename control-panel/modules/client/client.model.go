@@ -24,6 +24,7 @@ type Manager interface {
 	FindProject(acronym string) (*projectmodule.Project, error)
 	FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
 
+	RegisterContextClient(contextId string, client *Client)
 	DistributeEvent(e *tooleventmodule.ToolEvent)
 }
 
