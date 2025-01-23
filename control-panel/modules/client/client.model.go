@@ -28,12 +28,13 @@ type Manager interface {
 }
 
 type Client struct {
-	ID        string
-	manager   Manager
-	user      *usermodule.User
-	entity    toolentity.ToolEntityAdapter
-	sessionId string
-	terminals sync.Map
+	ID                      string
+	manager                 Manager
+	user                    *usermodule.User
+	entity                  toolentity.ToolEntityAdapter
+	sessionId               string
+	terminals               sync.Map
+	contextTerminalResolver ContextTerminalResolver
 }
 
 func NewClient(
@@ -45,12 +46,13 @@ func NewClient(
 	id := uuid.New().String()
 
 	c := Client{
-		ID:        id,
-		manager:   manager,
-		entity:    entity,
-		user:      user,
-		sessionId: sessionId,
-		terminals: sync.Map{},
+		ID:                      id,
+		manager:                 manager,
+		entity:                  entity,
+		user:                    user,
+		sessionId:               sessionId,
+		terminals:               sync.Map{},
+		contextTerminalResolver: ContextTerminalResolver{},
 	}
 
 	return &c
@@ -64,6 +66,26 @@ func (c *Client) Start() {
 	})
 
 	c.entity.StartHandler()
+}
+
+func (c *Client) SendEvent(e *tooleventmodule.ToolEvent) {
+	c.log("sending event: ", e)
+
+	if e.ContextId == "" {
+		log.Fatalln("[Client] context empty when sending message to client")
+	}
+
+	maybeTerm := c.contextTerminalResolver.Resolve(e.ContextId)
+	if maybeTerm == nil {
+		c.log("error: (INTERNAL DROP) no terminal found fot context: ", e.ContextId)
+		return
+	}
+	term := maybeTerm
+
+	e.TerminalId = term.ID
+	e.SessionId = c.sessionId
+
+	c.entity.SendEvent(e)
 }
 
 func (c *Client) openTerminal(projectAcronym string, toolAcronym string) (*Terminal, error) {
