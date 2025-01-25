@@ -141,6 +141,11 @@ func (p *Provider) SendEvent(e *tooleventmodule.ToolEvent) (success bool) {
 	return true
 }
 
+func (p *Provider) UnregisterContext(ctxid string) {
+	p.log("unregistering context's execution: ", ctxid)
+	p.contextExecutionMap.Delete(ctxid)
+}
+
 func (p *Provider) completeHandshake(project *projectmodule.Project) {
 	handshakeId := uuid.NewString()
 

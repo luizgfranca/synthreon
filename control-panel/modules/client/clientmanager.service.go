@@ -127,8 +127,20 @@ func (s *ClientManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
 	return nil
 }
 
+func (s *ClientManagerService) UnregisterContext(ctxid string) {
+	s.log("unregistering context: ", ctxid)
+	client := s.contextClientResolver.Resolve(ctxid)
+	if client == nil {
+		log.Fatalln("[ClientManagerService] unexpected state: trying to unregister unexisting context: ", ctxid)
+	}
+
+	client.UnregisterContext(ctxid)
+
+	s.contextClientResolver.Unregister(ctxid)
+}
+
 func (s *ClientManagerService) log(v ...any) {
-	x := append([]any{"[ProviderManagerService]"}, v...)
+	x := append([]any{"[ClientManagerService]"}, v...)
 
 	log.Println(x...)
 }

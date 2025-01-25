@@ -130,6 +130,17 @@ func (p *ProviderManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
 	return nil
 }
 
+func (s *ProviderManagerService) UnregisterContext(ctxid string) {
+	s.log("unregistering context: ", ctxid)
+	provider := s.contextProviderResolver.TryResolve(ctxid)
+	if provider == nil {
+		log.Fatalln("[ProviderManagerService] unexpected: trying to unregister unexisting context: ", ctxid)
+	}
+
+	provider.UnregisterContext(ctxid)
+	s.contextProviderResolver.Unregister(ctxid)
+}
+
 func (p *ProviderManagerService) log(v ...any) {
 	x := append([]any{"[ProviderManagerService]"}, v...)
 

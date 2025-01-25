@@ -51,6 +51,16 @@ func (c *ContextProviderResolver) TryRouteEvent(e *tooleventmodule.ToolEvent) er
 	return nil
 }
 
+// TryResolve return is nullable
+func (c *ContextProviderResolver) TryResolve(ctxid string) *Provider {
+	provider, ok := c.contextToProviderAssignment[ctxid]
+	if !ok {
+		return nil
+	}
+
+	return provider
+}
+
 type ContextNotFounError struct{}
 
 func (c *ContextNotFounError) Error() string {

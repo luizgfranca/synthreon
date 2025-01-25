@@ -90,6 +90,20 @@ func (c *Client) SendEvent(e *tooleventmodule.ToolEvent) {
 	c.entity.SendEvent(e)
 }
 
+func (c *Client) UnregisterContext(ctxid string) {
+	c.log("unregistering context: ", ctxid)
+	term := c.contextTerminalResolver.Resolve(ctxid)
+	if term == nil {
+		log.Fatalln("[Client] unexpected: trying to unregister unexisting terminal for context: ", ctxid)
+	}
+
+	c.log("unregistering terminal: ", term.ID, "for context: ", ctxid)
+	c.contextTerminalResolver.Unregister(ctxid)
+	c.terminals.Delete(term.ID)
+
+	c.contextTerminalResolver.Unregister(ctxid)
+}
+
 func (c *Client) openTerminal(projectAcronym string, toolAcronym string) (*Terminal, error) {
 	project, err := c.manager.FindProject(projectAcronym)
 	if err != nil {
