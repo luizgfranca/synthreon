@@ -34,8 +34,8 @@ type ClientManagerService struct {
 func NewCLientManagerService(
 	orchestrator Orchestrator,
 	projectService *projectmodule.ProjectService,
-) ClientManagerService {
-	return ClientManagerService{
+) *ClientManagerService {
+	return &ClientManagerService{
 		orchestrator:          orchestrator,
 		projectService:        projectService,
 		contextClientResolver: ContextClientResolver{},
@@ -91,7 +91,11 @@ func (s *ClientManagerService) DistributeEvent(e *tooleventmodule.ToolEvent) {
 func (s *ClientManagerService) RegisterClientToolOopen(client *Client) (contextId string) {
 	ctxid := uuid.NewString()
 
-	s.log("tool open by client - ", ctxid, ": ", client)
+	s.log(
+		"tool open by client.\n",
+		"context: ", ctxid, "\n",
+		"client: ", client, "\n",
+	)
 	ok := s.contextClientResolver.TryRegister(ctxid, client)
 	for !ok {
 		ok = s.contextClientResolver.TryRegister(ctxid, client)
@@ -100,11 +104,13 @@ func (s *ClientManagerService) RegisterClientToolOopen(client *Client) (contextI
 	return ctxid
 }
 
+// TODO: get user from session instead of requiring arg
 func (s *ClientManagerService) EntityConnection(
 	session *sessionmodule.Session,
 	user *usermodule.User,
 	entity toolentity.ToolEntityAdapter,
 ) {
+	s.log("new entity connected: ", entity)
 	c := NewClient(
 		s,
 		entity,
@@ -112,9 +118,12 @@ func (s *ClientManagerService) EntityConnection(
 		session,
 	)
 
+	s.log("saving new client: ", c.ID)
 	s.clientsLock.Lock()
 	s.clients = append(s.clients, c)
 	s.clientsLock.Unlock()
+
+	c.Start()
 }
 
 func (s *ClientManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
@@ -122,7 +131,13 @@ func (s *ClientManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
 		log.Fatalln("[ClientManagerService] context shound arrive already filled")
 	}
 
-	s.contextClientResolver.Resolve(e.ContextId)
+	client := s.contextClientResolver.Resolve(e.ContextId)
+	if client == nil {
+		log.Fatalln("[ClientManagerService] no client found for internal send event")
+	}
+
+	s.log("directing event for sending to client", client)
+	client.SendEvent(e)
 
 	return nil
 }

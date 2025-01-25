@@ -11,8 +11,14 @@ type ContextClientResolver struct {
 	registry sync.Map
 }
 
-func (r *ContextClientResolver) TryRegister(contextId string, term *Client) (ok bool) {
-	return r.registry.CompareAndSwap(contextId, nil, term)
+func (r *ContextClientResolver) TryRegister(ctxid string, client *Client) (success bool) {
+	_, ok := r.registry.Load(ctxid)
+	if ok {
+		return false
+	}
+
+	r.registry.Store(ctxid, client)
+	return true
 }
 
 func (r *ContextClientResolver) Unregister(contextId string) {

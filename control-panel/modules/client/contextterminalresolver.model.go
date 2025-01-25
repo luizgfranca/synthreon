@@ -11,8 +11,14 @@ type ContextTerminalResolver struct {
 	registry sync.Map
 }
 
-func (r *ContextTerminalResolver) TryRegister(contextId string, term *Terminal) (ok bool) {
-	return r.registry.CompareAndSwap(contextId, nil, term)
+func (r *ContextTerminalResolver) TryRegister(ctxid string, term *Terminal) (success bool) {
+	_, ok := r.registry.Load(ctxid)
+	if ok {
+		return false
+	}
+
+	r.registry.Store(ctxid, term)
+	return true
 }
 
 func (r *ContextTerminalResolver) Unregister(contextId string) {

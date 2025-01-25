@@ -129,7 +129,13 @@ func (c *Client) openTerminal(projectAcronym string, toolAcronym string) (*Termi
 }
 
 func (c *Client) saveTerminalIfDoesntExist(t *Terminal) (success bool) {
-	return c.terminals.CompareAndSwap(t.ID, nil, t)
+	_, ok := c.terminals.Load(t.ID)
+	if ok {
+		return false
+	}
+
+	c.terminals.Store(t.ID, t)
+	return true
 }
 
 func (c *Client) getTerminal(id string) *Terminal {
@@ -159,7 +165,7 @@ func (c *Client) onOpenEvent(e *tooleventmodule.ToolEvent) {
 	c.log("registering new terminal: ", terminal.ID, terminal)
 	success := c.saveTerminalIfDoesntExist(terminal)
 	if !success {
-		panic("unexpected state, tried to create terminal but it already exists")
+		log.Fatalln("[Client] unexpected state: tried to create terminal but it already exists")
 	}
 
 	ctxid := c.manager.RegisterClientToolOopen(c)
