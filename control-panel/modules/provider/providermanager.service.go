@@ -14,8 +14,7 @@ type Orchestrator interface {
 }
 
 // FIXME: add project and tool deregistration handling
-// FIXME: finish implementation
-// FIXME: it doesn't map event to
+// TODO: create abstractions for managerServices
 type ProviderManagerService struct {
 	orchestrator Orchestrator
 

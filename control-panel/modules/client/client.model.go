@@ -4,6 +4,7 @@ import (
 	"log"
 	commonmodule "platformlab/controlpanel/modules/common"
 	projectmodule "platformlab/controlpanel/modules/project"
+	sessionmodule "platformlab/controlpanel/modules/session"
 	toolmodule "platformlab/controlpanel/modules/tool"
 	"platformlab/controlpanel/modules/toolentity"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
@@ -24,7 +25,7 @@ type Manager interface {
 	FindProject(acronym string) (*projectmodule.Project, error)
 	FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
 
-	RegisterContextClient(contextId string, client *Client)
+	RegisterClientToolOopen(client *Client) (contextId string)
 	DistributeEvent(e *tooleventmodule.ToolEvent)
 }
 
@@ -32,8 +33,8 @@ type Client struct {
 	ID                      string
 	manager                 Manager
 	user                    *usermodule.User
+	session                 *sessionmodule.Session
 	entity                  toolentity.ToolEntityAdapter
-	sessionId               string
 	terminals               sync.Map
 	contextTerminalResolver ContextTerminalResolver
 }
@@ -42,7 +43,7 @@ func NewClient(
 	manager Manager,
 	entity toolentity.ToolEntityAdapter,
 	user *usermodule.User,
-	sessionId string,
+	session *sessionmodule.Session,
 ) *Client {
 	id := uuid.New().String()
 
@@ -51,7 +52,7 @@ func NewClient(
 		manager:                 manager,
 		entity:                  entity,
 		user:                    user,
-		sessionId:               sessionId,
+		session:                 session,
 		terminals:               sync.Map{},
 		contextTerminalResolver: ContextTerminalResolver{},
 	}
@@ -84,7 +85,7 @@ func (c *Client) SendEvent(e *tooleventmodule.ToolEvent) {
 	term := maybeTerm
 
 	e.TerminalId = term.ID
-	e.SessionId = c.sessionId
+	e.SessionId = c.session.ID
 
 	c.entity.SendEvent(e)
 }
@@ -147,7 +148,19 @@ func (c *Client) onOpenEvent(e *tooleventmodule.ToolEvent) {
 		panic("unexpected state, tried to create terminal but it already exists")
 	}
 
+	ctxid := c.manager.RegisterClientToolOopen(c)
+
+	ok := c.contextTerminalResolver.TryRegister(ctxid, terminal)
+	if !ok {
+		log.Fatalln(
+			"context worked on manager but failed in terminal creation\n",
+			"contextId: ", ctxid, "\n",
+			"termnial already registered: ", c.contextTerminalResolver.Resolve(ctxid),
+		)
+	}
+
 	e.SessionId = ""
+	e.ContextId = ctxid
 
 	c.manager.DistributeEvent(e)
 }

@@ -1,16 +1,25 @@
 package clientmodule
 
 import (
+	"log"
+	commonmodule "platformlab/controlpanel/modules/common"
 	projectmodule "platformlab/controlpanel/modules/project"
+	sessionmodule "platformlab/controlpanel/modules/session"
 	toolmodule "platformlab/controlpanel/modules/tool"
 	"platformlab/controlpanel/modules/toolentity"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	usermodule "platformlab/controlpanel/modules/user"
+	"sync"
+
+	"github.com/google/uuid"
 )
 
 type Orchestrator interface {
-	ForwardEventToClient(e *tooleventmodule.ToolEvent)
+	ForwardEventToProvider(e *tooleventmodule.ToolEvent)
 }
 
+// TODO: create abstractions for managerServices
+// FIXME: should implement client unregistration
 type ClientManagerService struct {
 	orchestrator Orchestrator
 
@@ -18,7 +27,8 @@ type ClientManagerService struct {
 
 	projectService *projectmodule.ProjectService
 
-	clients []Client
+	clientsLock sync.Mutex
+	clients     []*Client
 }
 
 func NewCLientManagerService(
@@ -29,34 +39,96 @@ func NewCLientManagerService(
 		orchestrator:          orchestrator,
 		projectService:        projectService,
 		contextClientResolver: ContextClientResolver{},
-		clients:               []Client{},
+		clients:               []*Client{},
 	}
 }
 
 // FindProject implements Manager.
 func (s *ClientManagerService) FindProject(acronym string) (*projectmodule.Project, error) {
-	panic("uninplemented")
+	s.log("looking for project: ", acronym)
+	maybeProject, err := s.projectService.FindByAcronym(acronym)
+	if err != nil {
+		return nil, err
+	}
+
+	if maybeProject == nil {
+		return nil, &commonmodule.GenericLogicError{Message: "project not fonud"}
+	}
+	project := maybeProject
+	s.log("project found: ", project)
+
+	return project, nil
 }
 
 // FindTool implements Manager.
 func (s *ClientManagerService) FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error) {
-	panic("uninplemented")
+	s.log(
+		"looking for referenced tool: \n",
+		"project: ", project.Acronym, "\n",
+		"tool: ", acronym,
+	)
+
+	maybeTool, err := s.projectService.FindToolByAcronym(project, acronym)
+	if err != nil {
+		return nil, err
+	}
+	tool := maybeTool
+
+	if tool == nil {
+		return nil, &commonmodule.GenericLogicError{Message: "tool from project not fonud"}
+	}
+
+	s.log("tool found:", tool)
+	return tool, nil
 }
 
 // DistributeEvent implements Manager.
 func (s *ClientManagerService) DistributeEvent(e *tooleventmodule.ToolEvent) {
-	panic("uninplemented")
+	s.orchestrator.ForwardEventToProvider(e)
 }
 
-// RegisterClientContext implements Manager.
-func (s *ClientManagerService) RegisterContextClient(contextId string, client *Client) {
-	panic("uninplemented")
+// RegisterClientToolOopen implements Manager.
+func (s *ClientManagerService) RegisterClientToolOopen(client *Client) (contextId string) {
+	ctxid := uuid.NewString()
+
+	s.log("tool open by client - ", ctxid, ": ", client)
+	ok := s.contextClientResolver.TryRegister(ctxid, client)
+	for !ok {
+		ok = s.contextClientResolver.TryRegister(ctxid, client)
+	}
+
+	return ctxid
 }
 
-func (s *ClientManagerService) EntityConnection(entity toolentity.ToolEntityAdapter) {
-	panic("unimplemented")
+func (s *ClientManagerService) EntityConnection(
+	session *sessionmodule.Session,
+	user *usermodule.User,
+	entity toolentity.ToolEntityAdapter,
+) {
+	c := NewClient(
+		s,
+		entity,
+		user,
+		session,
+	)
+
+	s.clientsLock.Lock()
+	s.clients = append(s.clients, c)
+	s.clientsLock.Unlock()
 }
 
 func (s *ClientManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
-	panic("unimplemented")
+	if e.ContextId == "" {
+		log.Fatalln("[ClientManagerService] context shound arrive already filled")
+	}
+
+	s.contextClientResolver.Resolve(e.ContextId)
+
+	return nil
+}
+
+func (s *ClientManagerService) log(v ...any) {
+	x := append([]any{"[ProviderManagerService]"}, v...)
+
+	log.Println(x...)
 }
