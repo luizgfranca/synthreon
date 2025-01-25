@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	commonmodule "platformlab/controlpanel/modules/common"
 	sessionmodule "platformlab/controlpanel/modules/session"
 	"platformlab/controlpanel/server/api"
 	"strings"
@@ -49,7 +50,7 @@ func GetSessionMiddleware(secret string) func(next http.Handler) http.Handler {
 					return
 				}
 
-				ctx := context.WithValue(r.Context(), RequestContextSession, session)
+				ctx := context.WithValue(r.Context(), commonmodule.SessionRequestContextKey, session)
 
 				next.ServeHTTP(w, r.WithContext(ctx))
 			},

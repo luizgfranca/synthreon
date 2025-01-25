@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	commonmodule "platformlab/controlpanel/modules/common"
+	orchestratormodule "platformlab/controlpanel/modules/orchestrator"
+	projectmodule "platformlab/controlpanel/modules/project"
+	sessionmodule "platformlab/controlpanel/modules/session"
+	toolmodule "platformlab/controlpanel/modules/tool"
+	"platformlab/controlpanel/modules/toolentity"
 	modules "platformlab/controlpanel/modules/user"
-	"platformlab/controlpanel/server/api/connectionmgr"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -21,25 +26,8 @@ const (
 type Tool struct {
 	websocketUpgrader websocket.Upgrader
 
-	userService modules.UserService
-
-	providerMgr *connectionmgr.ProviderMgr
-	clientMgr   *connectionmgr.ClientMgr
-}
-
-func (t *Tool) clientConnectionHandler(connection *websocket.Conn) {
-	log.Print("[ToolAPI] new client connection")
-	t.clientMgr.NewClient(connection)
-}
-
-func (t *Tool) providerConnectionHandler(connection *websocket.Conn) {
-	log.Print("[ToolAPI] new provider connection")
-	t.providerMgr = connectionmgr.NewProviderConnectionMgr(connection)
-
-	// TODO: maybe it should be better if instead of passing them i just passed the
-	// 		 complete tool context that would have the managers
-	t.clientMgr.ProviderMgr = t.providerMgr
-	t.providerMgr.ClientMgr = t.clientMgr
+	userService         modules.UserService
+	orchestratorService *orchestratormodule.OrchestratorService
 }
 
 func upgraderAllowAllOrigins(r *http.Request) bool {
@@ -56,7 +44,20 @@ func (t *Tool) ToolClientWebsocket() func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		go t.clientConnectionHandler(connection)
+		// TODO: abstract this behavior later
+		v := r.Context().Value(commonmodule.SessionRequestContextKey)
+		session, ok := v.(*sessionmodule.Session)
+		if !ok {
+			log.Fatalln("session expected in context when starting websocket connection")
+		}
+
+		user, err := t.userService.FindByEmail(session.Email)
+		if err != nil {
+			log.Fatalln("unexpected: session ", session, " emitted with an invalid user?")
+		}
+
+		entity := toolentity.NewWebsocketToolEntity(connection)
+		t.orchestratorService.RegisterClientEntity(session, user, entity)
 	}
 }
 
@@ -118,17 +119,22 @@ func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		go t.providerConnectionHandler(connection)
+		entity := toolentity.NewWebsocketToolEntity(connection)
+		t.orchestratorService.RegisterProviderEntity(entity)
 	}
 }
 
 func ToolRestAPI(db *gorm.DB) *Tool {
+	toolService := toolmodule.ToolService{Db: db}
+	projectService := projectmodule.ProjectService{Db: db}
+
 	return &Tool{
 		websocketUpgrader: websocket.Upgrader{CheckOrigin: upgraderAllowAllOrigins},
 
 		userService: modules.UserService{Db: db},
-
-		clientMgr:   &connectionmgr.ClientMgr{},
-		providerMgr: nil,
+		orchestratorService: orchestratormodule.NewOrchestratorService(
+			&projectService,
+			&toolService,
+		),
 	}
 }

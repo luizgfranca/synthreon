@@ -5,8 +5,11 @@ import (
 	clientmodule "platformlab/controlpanel/modules/client"
 	projectmodule "platformlab/controlpanel/modules/project"
 	providermodule "platformlab/controlpanel/modules/provider"
+	sessionmodule "platformlab/controlpanel/modules/session"
 	toolmodule "platformlab/controlpanel/modules/tool"
+	"platformlab/controlpanel/modules/toolentity"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	usermodule "platformlab/controlpanel/modules/user"
 )
 
 // TODO: should centralize the concept of context here,
@@ -35,6 +38,18 @@ func NewOrchestratorService(
 
 	o.providerManager = &providerManager
 	return &o
+}
+
+func (o *OrchestratorService) RegisterClientEntity(
+	session *sessionmodule.Session,
+	user *usermodule.User,
+	entity toolentity.ToolEntityAdapter,
+) {
+	o.clientManager.EntityConnection(session, user, entity)
+}
+
+func (o *OrchestratorService) RegisterProviderEntity(entity toolentity.ToolEntityAdapter) {
+	o.providerManager.EntityConnection(entity)
 }
 
 // ForwardEventToClient implements providermodule.Orchestrator.
