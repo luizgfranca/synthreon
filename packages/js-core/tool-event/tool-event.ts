@@ -22,8 +22,8 @@ type EventType = typeof EventTypeValue[keyof typeof EventTypeValue]
 
 export type ToolEventDto = {
     type: EventType;
-    project: string;
-    tool: string;
+    project?: string;
+    tool?: string;
 
     announcement_id?: string;
     provider_id?: string;
@@ -32,6 +32,7 @@ export type ToolEventDto = {
     terminal_id?: string;
     session_id?: string;
     context_id?: string;
+    handshake_id?: string;
 
     display?: DisplayDefinition;
     input?: InputDefinition;

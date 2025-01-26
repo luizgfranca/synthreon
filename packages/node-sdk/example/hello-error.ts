@@ -1,14 +1,20 @@
-import { PlatformConnection } from "../src/platform-connection";
+import { ToolProvider } from '../src/platform-provider'
 
-const connection = new PlatformConnection({
+const tool = new ToolProvider({
+    project: 'sandbox',
     endpoint: 'ws://localhost:8080/api/tool/provider/ws',
     credentials: {
         username: 'test@test.com',
-        password: 'password'
+        password: 'password',
     },
-    toolFunction: async () => {
-        throw 'Hello error'
-    }
+    tools: [
+        {
+            toolId: 'sandbox',
+            toolFunction: async () => {
+                throw 'Hello error'
+            },
+        },
+    ],
 })
 
-connection.listen();
+tool.listen()

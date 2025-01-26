@@ -10,9 +10,11 @@
   "author": "luizgfc@proton.me",
   "license": "GPL-3.0",
   "dependencies": {
+    "uuid": "^11.0.5",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.12"
   }
 }

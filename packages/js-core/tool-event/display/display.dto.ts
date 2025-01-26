@@ -2,13 +2,13 @@ import { InformationDisplay } from "./information.dto";
 import { PromptDisplay } from "./prompt.dto";
 import { TextBoxDisplay } from "./textbox.dto";
 
-const DisplayTypeValue = {
+export const DisplayTypeValue = {
     Prompt: "prompt",
     Information: "information",
     TextBox: "textbox"
 } as const;
 
-type DisplayType = typeof DisplayTypeValue[keyof typeof DisplayTypeValue]
+export type DisplayType = typeof DisplayTypeValue[keyof typeof DisplayTypeValue]
 
 export type DisplayDefinition = {
     type: DisplayType;
@@ -16,3 +16,7 @@ export type DisplayDefinition = {
     information?: InformationDisplay;
     textBox?: TextBoxDisplay;
 };
+
+export * from './prompt.dto'
+export * from './information.dto'
+export * from './textbox.dto'

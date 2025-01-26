@@ -1,21 +1,24 @@
 {
-    "name": "platformlab-core",
-    "version": "0.0.0",
-    "description": "Core structures for platformlab JS",
-    "author": "luizgfc@proton.me",
-    "license": "AGPL-v3",
-    "main": "dist/src/index.js",
-    "types": "dist/src/index.d.ts",
-    "scripts": {
-      "build": "tsc -d",
-      "test": "node --import tsx --test ./test/**",
-      "prepublish": "npm run build"
-    },
-    "devDependencies": {
-      "@types/node": "^22.10.10",
-      "prettier": "^3.4.2",
-      "tsx": "^4.19.2",
-      "typescript": "^5.7.3"
-    }
+  "name": "platformlab-core",
+  "version": "0.0.0",
+  "description": "Core structures for platformlab JS",
+  "author": "luizgfc@proton.me",
+  "license": "AGPL-v3",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc -d",
+    "test": "node --import tsx --test ./test/**",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "@types/uuid": "^10.0.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "uuid": "^11.0.5"
   }
-  
+}

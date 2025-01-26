@@ -1,8 +1,8 @@
-export const PromptType = {
+export const PromptTypeOption = {
     String: "string"
 };
 
-type PromptType = typeof PromptType[keyof typeof PromptType]
+export type PromptType = typeof PromptTypeOption[keyof typeof PromptTypeOption]
 
 export type PromptDisplay = {
     title: string;
