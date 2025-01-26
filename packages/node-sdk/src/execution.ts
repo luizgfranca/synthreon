@@ -12,6 +12,7 @@ type InputSubscriber = (input: InputDefinition) => void
 
 export class Execution {
     #id: string
+    #contextId?: string
 
     // FIXME: subscribers should have a timeout
     #inputSubscribers: InputSubscriber[]
@@ -36,7 +37,7 @@ export class Execution {
         this.#inputSubscribers = []
     }
 
-    start() {
+    start(startingEvent: ToolEventDto) {
         this.#promise = new Promise((resolve, reject) => {
             try {
                 this.#definition
@@ -47,6 +48,8 @@ export class Execution {
                 reject(e)
             }
         });
+
+        this.#contextId = startingEvent.context_id;
 
         this.#promise
             .then((resultMessage) => {
@@ -121,6 +124,7 @@ export class Execution {
     #sendEvent(event: ToolEventDto) {
         event.tool = this.#definition.toolId
         event.execution_id = this.#id
+        event.context_id = this.#contextId
 
         this.#forwardEvent(event)
     }

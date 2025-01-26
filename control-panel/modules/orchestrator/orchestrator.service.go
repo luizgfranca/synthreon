@@ -32,11 +32,14 @@ func NewOrchestratorService(
 		toolService:    toolService,
 	}
 
-	providerManager := providermodule.NewProviderManagerService(
+	o.providerManager = providermodule.NewProviderManagerService(
 		&o, projectService, toolService,
 	)
 
-	o.providerManager = &providerManager
+	o.clientManager = clientmodule.NewCLientManagerService(
+		&o, projectService,
+	)
+
 	return &o
 }
 
@@ -45,6 +48,9 @@ func (o *OrchestratorService) RegisterClientEntity(
 	user *usermodule.User,
 	entity toolentity.ToolEntityAdapter,
 ) {
+	if session == nil || user == nil || entity == nil {
+		log.Fatalln("[OrchestratorService] null parameters when trying to register client entity", session, user, entity)
+	}
 	o.clientManager.EntityConnection(session, user, entity)
 }
 

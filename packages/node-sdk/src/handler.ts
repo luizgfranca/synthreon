@@ -42,13 +42,10 @@ export class Handler {
     start() {
         console.debug('starting handler')
         this.#performAnnouncement()
-        if (this.#status === 'connected' && this.#handlerId) {
-            // FIXME: evaluate if i should remove this
-            this.#bus.on(this.#handlerId, (event: ToolEventDto) => this.#handleEvent(event))
-        }
     }
 
     #handleEvent(event: ToolEventDto) {
+        console.debug('[handler] handling event', event)
         if(this.#status !== 'connected') {
             console.warn('DROPPING event becuase handler is in disconnected state')
         }
@@ -71,7 +68,7 @@ export class Handler {
 
         // FIXME: infinitely growing, devise a way to trim it down
         this.#executions.push(execution)
-        execution.start();
+        execution.start(event);
     }
 
     #sendToBus(event: ToolEventDto) {
@@ -117,6 +114,10 @@ export class Handler {
                 this.#handlerId = event.handler_id;
                 this.#announcementId = event.announcement_id;
                 this.#status = 'connected';
+
+                console.debug(`registering handler ${this.#handlerId} to handle events`)
+                this.#bus.on(this.#handlerId, (event: ToolEventDto) => this.#handleEvent(event))
+                
                 return
             case EventTypeValue.AnnouncementNACK:
                 console.error('received NACK trying to register handler with reason:', event.reason)

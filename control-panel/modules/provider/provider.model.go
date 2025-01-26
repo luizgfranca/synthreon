@@ -115,7 +115,7 @@ func (p *Provider) log(v ...any) {
 }
 
 func (p *Provider) SendEvent(e *tooleventmodule.ToolEvent) (success bool) {
-	p.log("sending event: ", e)
+	p.log("sending event to provider: ", e)
 
 	err := p.fillEventHandler(e)
 	if err != nil {

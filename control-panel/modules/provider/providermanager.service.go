@@ -31,8 +31,8 @@ func NewProviderManagerService(
 	orchestrator Orchestrator,
 	projectService *projectmodule.ProjectService,
 	toolService *toolmodule.ToolService,
-) ProviderManagerService {
-	return ProviderManagerService{
+) *ProviderManagerService {
+	return &ProviderManagerService{
 		orchestrator:   orchestrator,
 		projectService: projectService,
 
@@ -100,22 +100,27 @@ func (p *ProviderManagerService) EntityConnection(entity toolentity.ToolEntityAd
 }
 
 func (p *ProviderManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
+	p.log("event received by providerManager")
 	if e.ContextId == "" || e.Tool == "" || e.Project == "" {
 		log.Fatalln("[ProviderManagerService] unexptected event attributes when reaching providerManager", e)
 	}
 
+	p.log("trying to route")
 	err := p.contextProviderResolver.TryRouteEvent(e)
 	if err != nil {
 		switch err.(type) {
 		case *ContextNotFounError:
-
+			p.log("context not found, creating")
 			provider, err := p.projectAndToolProviderResolver.Resolve(e.Project, e.Tool)
 			if err != nil {
 				p.log("provider resolution error: ", err.Error())
 				return err
 			}
 
+			p.log("registering new context")
 			p.contextProviderResolver.Register(e.ContextId, provider)
+
+			p.log("routing event to provider")
 			err = p.contextProviderResolver.TryRouteEvent(e)
 			if err != nil {
 				log.Fatalln("unexpected behavior: could not route event even after context setup")

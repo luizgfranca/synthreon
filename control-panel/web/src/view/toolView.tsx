@@ -1,21 +1,49 @@
 import { DisplayRenderer, Field } from "@/component/displayRenderer";
 import { EmptyState } from "@/component/emptyState";
-import { ToolEvent } from "@/model/toolEvent";
 import BackendService from "@/service/backend.service";
 import { useMemo, useState } from "react";
+
+import { ToolEventDto } from 'platformlab-core';
+
+
+const ToolEventEncoder = {
+    encodeV0: (event: ToolEventDto): string => {
+        const prefix = 'v0.0';
+        const data = JSON.stringify(event)
+        return `${prefix}|${data}`
+    },
+    decodeV0: (input: string): {result?: ToolEventDto, error?: Error} => {
+        const [prefix, rawData] = input.split('|')
+        if(prefix !== 'v0.0') {
+            return {
+                error: new Error('unsupported protovol version')
+            }
+        }
+
+        return {
+            result: JSON.parse(rawData)
+        }
+    }
+}
 
 type ToolViewProps = {
     project?: string,
     tool?: string,
 }
 
-function sendEvent(ws: WebSocket, event: ToolEvent) {
+type ExecutionContext = {
+    contextId?: string;
+    terminalId?: string;
+}
+
+function sendEvent(ws: WebSocket, event: ToolEventDto) {
     console.log('sending event: ', event);
-    ws.send(JSON.stringify(event))
+    ws.send(ToolEventEncoder.encodeV0(event))
 }
 
 export function ToolView(props: ToolViewProps) {
-    const [event, setEvent] = useState<ToolEvent | null>(null)
+    const [event, setEvent] = useState<ToolEventDto | null>(null)
+    const [executionContext, setExecutionContext] = useState<ExecutionContext | undefined>()
     const [resetToggle, setResetToggle] = useState<boolean>()
     console.log('e', event)
 
@@ -35,8 +63,7 @@ export function ToolView(props: ToolViewProps) {
 
             if (props.project && props.tool) {
                 sendEvent(ws, {
-                    class: 'interaction',
-                    type: 'open',
+                    type: 'interaction/open',
                     project: props.project,
                     tool: props.tool
                 })
@@ -47,7 +74,23 @@ export function ToolView(props: ToolViewProps) {
 
         ws.addEventListener('message', (e) => {
             console.log(`recv: ${e.data}`)
-            setEvent(JSON.parse(e.data))
+            const {result, error} = ToolEventEncoder.decodeV0(e.data)
+            if (!error && result) {
+                if(!executionContext) {
+                    console.debug('setting execution context', {
+                        contextId: result.context_id,
+                        terminalId: result.terminal_id
+                    })
+
+                    setExecutionContext({
+                        contextId: result.context_id,
+                        terminalId: result.terminal_id
+                    })
+                }
+                setEvent(result)
+            } else {
+                console.error('error decoding event: ', error)
+            }
         })
 
         setResetToggle(false)
@@ -58,10 +101,11 @@ export function ToolView(props: ToolViewProps) {
     const sendInputInteraction = (fields: Field[]) => {
         if (props.project && props.tool) {
             sendEvent(ws, {
-                class: 'interaction',
-                type: 'input',
+                type: 'interaction/input',
                 project: props.project,
                 tool: props.tool,
+                context_id: executionContext?.contextId,
+                terminal_id: executionContext?.terminalId,
                 input: {
                     fields
                 }
@@ -74,6 +118,7 @@ export function ToolView(props: ToolViewProps) {
     const reset = () => {
         console.log('RESET')
         setResetToggle(true)
+        setExecutionContext(undefined)
     }
 
     if (!props.project || !props.tool) {
@@ -84,7 +129,8 @@ export function ToolView(props: ToolViewProps) {
         )
     }
 
-    if(!event || !event.display) {
+    if(!event || (!event.display && !event.result)) {
+        console.debug('no event', event)
         return (
             <div className="flex pt-10">
 
@@ -96,7 +142,7 @@ export function ToolView(props: ToolViewProps) {
         <div className="text-zinc-100 h-screen pt-10">
             <div className="container mx-auto px-4">
                 <DisplayRenderer 
-                    definition={event.display} 
+                    event={event}
                     onSumission={(fields) => sendInputInteraction(fields)}
                     resetCallback={() => reset()}
                 />

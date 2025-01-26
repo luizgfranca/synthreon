@@ -127,6 +127,7 @@ func (s *ClientManagerService) EntityConnection(
 }
 
 func (s *ClientManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
+	// BUG: when command/finish without contextId arriving here and crashing the application
 	if e.ContextId == "" {
 		log.Fatalln("[ClientManagerService] context shound arrive already filled")
 	}

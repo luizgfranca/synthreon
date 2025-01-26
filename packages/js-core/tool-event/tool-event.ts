@@ -18,7 +18,7 @@ export const EventTypeValue = {
     CommandFinish: "command/finish",
 } as const
 
-type EventType = typeof EventTypeValue[keyof typeof EventTypeValue]
+export type EventType = typeof EventTypeValue[keyof typeof EventTypeValue]
 
 export type ToolEventDto = {
     type: EventType;

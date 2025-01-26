@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { Result } from "./result";
 import { Prompt } from "./prompt";
 import { TextBox } from "./textBox";
+import { ToolEventResult } from "platformlab-core/dist/tool-event/result/result.dto";
+import { ToolEventDto } from "platformlab-core";
 
 type DisplayElement = {
     type: string;
@@ -41,27 +43,37 @@ export type Field = {
 }
 
 export type DsiplayRendererProps = {
-    definition: DisplayDefinition
+    event: ToolEventDto
     onSumission: (fields: Field[]) => void
     
     resetCallback: () => void
 }
 
 export function DisplayRenderer(props: DsiplayRendererProps) {
-    switch(props.definition.type) {
-        case 'result':
-            return (
-                <Result 
-                    success={props.definition.result?.success ?? false}
-                    onConfirm={() => props.resetCallback()}
-                >
-                    {props.definition.result?.message ?? ''}
-                </Result>
-            )
+    console.debug('on displayRenderer', props.event)
+
+    if (props.event.type === 'command/finish') {
+        const success = props.event.result && props.event.result.status === 'success' || false
+
+        return (
+            <Result 
+                success={success}
+                onConfirm={() => props.resetCallback()}
+            >
+                {props.event.result?.message ?? ''}
+            </Result>
+        )
+    }
+
+    if(!props.event.display) {
+        throw new Error('expected display but its not defined')
+    }
+
+    switch(props.event?.display.type) {
         case 'prompt':
             return (
                 <Prompt 
-                    title={props.definition.prompt?.title ?? ''} 
+                    title={props.event.display.prompt?.title ?? ''} 
                     onSubmit={(value) => props.onSumission([{
                         name: 'prompt',
                         value
@@ -73,7 +85,7 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
                 <TextBox
                     onConfirm={() => props.onSumission([])}
                 >
-                    {props.definition.textBox?.content ?? ''}
+                    {props.event.display.textBox?.content ?? ''}
                 </TextBox>
             )
     }

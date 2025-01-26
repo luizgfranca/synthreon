@@ -83,7 +83,7 @@ func (e *WebsocketToolEntity) messageSenderThread() {
 	e.log("starting messageSender loop")
 
 	for {
-		e.log("waiting for new messages")
+		e.log("waiting for new messages to send")
 
 		select {
 		case <-e.done:

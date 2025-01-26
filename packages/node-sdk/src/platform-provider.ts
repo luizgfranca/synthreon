@@ -127,6 +127,17 @@ export class ToolProvider {
             return
         }
 
+        if(event.type === EventTypeValue.InteractionOpen) {
+            console.debug('open event, directing to handler')
+            if (!event.handler_id) {
+                console.warn('DROPPING: open event without handler_id', event)
+                return
+            }
+            
+            this.#bus.emit(event.handler_id, event)
+            return
+        }
+
         if(!event.execution_id) {
             console.warn('DROPPING: non announcement event without execution_id', event)
             return
