@@ -4,7 +4,6 @@ import (
 	"log"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
 	"sync"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -119,7 +118,7 @@ func (e *WebsocketToolEntity) messageReceiverThread() {
 		}
 
 		e.log("waiting for messages")
-		e.connection.SetReadDeadline(time.Now().Add(time.Second))
+		// FIXME: e.connection.SetReadDeadline(time.Now().Add(time.Second))
 		msgtype, message, err := e.connection.ReadMessage()
 		e.log("message received")
 		if err != nil {

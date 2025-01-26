@@ -41,6 +41,26 @@ export type ToolEventDto = {
     reason?: string;
 }
 
+export const ToolEventEncoder = {
+    encodeV0: (event: ToolEventDto): string => {
+        const prefix = 'v0.0';
+        const data = JSON.stringify(event)
+        return `${prefix}|${data}`
+    },
+    decodeV0: (input: string): {result?: ToolEventDto, error?: Error} => {
+        const [prefix, rawData] = input.split('|')
+        if(prefix !== 'v0.0') {
+            return {
+                error: new Error('unsupported protovol version')
+            }
+        }
+
+        return {
+            result: JSON.parse(rawData)
+        }
+    }
+}
+
 export function validateEvent(event: ToolEventDto): boolean{
     // FIXME: implement validation
     return false;

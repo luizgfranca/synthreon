@@ -35,6 +35,21 @@ func createExampleProjectsIfNotExists(db *gorm.DB) {
 	}
 }
 
+func createExampleToolsIfNotExists(db *gorm.DB) {
+	s := toolmodule.ToolService{Db: db}
+	exampleTools := []toolmodule.Tool{
+		{ProjectId: 1, Acronym: "sandbox", Description: "Sandbox tool for development testing"},
+	}
+
+	for _, t := range exampleTools {
+		dbtool, _ := s.FindByAcronym(t.Acronym)
+		if dbtool == nil {
+			log.Println("saving: ", t.Acronym)
+			s.Create(&t)
+		}
+	}
+}
+
 func createDefaultUserIfNotExists(db *gorm.DB, email string, password string) {
 	s := usermodule.UserService{Db: db}
 
@@ -60,6 +75,9 @@ func Setup(configService *configurationmodule.ConfigurationService, db *gorm.DB)
 
 	log.Println("[Setup] creating example projects...")
 	createExampleProjectsIfNotExists(db)
+
+	log.Println("[Setup] creating example tools...")
+	createExampleToolsIfNotExists(db)
 
 	log.Println("[Setup] asseting creation of default user...")
 	createDefaultUserIfNotExists(db, configService.RootUserEmail, configService.RootPassword)

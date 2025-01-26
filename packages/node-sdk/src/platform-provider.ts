@@ -1,4 +1,4 @@
-import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue } from 'platformlab-core'
+import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue, ToolEventEncoder } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
 import WebSocket, { RawData } from 'ws'
 import { Handler, ToolHandlerDefinition } from './handler'
@@ -45,6 +45,13 @@ export class ToolProvider {
     }
 
     listen() {
+        console.log('authstr', `${this.#credentials.username}:${this.#credentials.password}`)
+        console.log('authorization', `Basic ${Buffer.from(
+                        `${this.#credentials.username}:${
+                            this.#credentials.password
+                        }`
+                    ).toString('base64')}`)
+
         try {
             this.#websocket = new WebSocket(this.#endpoint, {
                 headers: {
@@ -66,8 +73,16 @@ export class ToolProvider {
         })
 
         this.#websocket.on("message", (data: RawData) => {
-            const event = JSON.parse(data.toString()) as ToolEventDto;
-            this.#onEventReceived(event);
+            const { result, error } = ToolEventEncoder.decodeV0(data.toString());
+            if (error) {
+                console.error('unable to parse event', data.toString())
+            }
+            if (!result) {
+                console.error('internal error: or a error or a result should be defined')
+                return;
+            }
+
+            this.#onEventReceived(result);
         });
 
     }
@@ -91,7 +106,7 @@ export class ToolProvider {
         if (!this.#websocket) {
             throw new Error('Internal error: expected websocket to be defined.')
         }
-        this.#websocket.send(JSON.stringify(event))
+        this.#websocket.send(ToolEventEncoder.encodeV0(event))
     }
 
     #processNormalEvent(event: ToolEventDto) {
@@ -99,7 +114,7 @@ export class ToolProvider {
             throw new Error('Internal invalid state: receiving event as connected but bus not set up properly')
         }
 
-        if(!event.handler_id || !event.project || !event.tool) {
+        if(!event.project || !event.tool) {
             console.warn('DROPPING malformed event', event)
             return
         }
@@ -108,7 +123,8 @@ export class ToolProvider {
             event.type == EventTypeValue.AnnouncementACK
             || event.type == EventTypeValue.AnnouncementNACK
         ) {
-            this.#bus.emit(`announcement/${event.tool}`)
+            this.#bus.emit(`announcement/${event.tool}`, event)
+            return
         }
 
         if(!event.execution_id) {
@@ -161,28 +177,35 @@ export class ToolProvider {
         
         switch(e.type) {
             case EventTypeValue.HandshakeNACK:
-                new Error(`handshake request not accepted by server; reason: ${e.reason}`)
+                throw new Error(`handshake request not accepted by server; reason: ${e.reason}`)
             case EventTypeValue.HandshakeACK:
                 this.#providerId = e.provider_id
                 this.#handshakeId = e.handshake_id
                 this.#setupBus()
                 this.#status = 'connected'
                 this.#startAnnouncement()
+                return;
             default:
                 throw new Error(`invalid event type received for handshake: ${e.type}`)
         }
     }
 
     #startAnnouncement() {
+        console.debug('starting announcement')
         // TODO: evaluate if i should pass the bus on the start function to be able to create handlers on the constructor
         this.#handlers = this.#handlerDefinitions.map(
             definition => {
                 if (!this.#bus) {
                     throw new Error('internal error: trying to do announcement without an active bus')
                 }
-        
+
+                console.debug('creating handler:', definition.toolId)
                 return new Handler(definition, this.#bus)
             }
         )
+
+        this.#handlers.forEach(handler => {
+            handler.start()
+        });
     }
 }

@@ -56,3 +56,16 @@ func (t *ToolService) Create(tool *Tool) (*Tool, error) {
 
 	return created, nil
 }
+
+func (t *ToolService) FindByAcronym(acronym string) (*Tool, error) {
+	var maybeTool *Tool
+
+	result := t.Db.Where("acronym = ?", acronym).First(&maybeTool)
+	if result.Error != nil {
+		return nil, &commonmodule.GenericLogicError{
+			Message: fmt.Sprintf("element with acronym %s not found", acronym),
+		}
+	}
+
+	return maybeTool, nil
+}

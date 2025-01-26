@@ -26,7 +26,7 @@ func StartServer(addr string, configService *configurationmodule.ConfigurationSe
 	route.SetupWebRoutes(router, appHandlers)
 
 	authenticatedRouter := router.PathPrefix("/api").Subrouter()
-	router.Use(middleware.GetSessionMiddleware(configService.AccessTokenSecret))
+	authenticatedRouter.Use(middleware.GetSessionMiddleware(configService.AccessTokenSecret))
 	route.SetupAuthenticatedRoutes(authenticatedRouter, appHandlers)
 
 	log.Println("[Server] listening at", addr)

@@ -27,6 +27,7 @@ export class Handler {
     #executions: Execution[]
 
     #handlerId?: string;
+    #announcementId?: string
 
     constructor(
         definition: ToolHandlerDefinition,
@@ -39,6 +40,7 @@ export class Handler {
     }
 
     start() {
+        console.debug('starting handler')
         this.#performAnnouncement()
         if (this.#status === 'connected' && this.#handlerId) {
             // FIXME: evaluate if i should remove this
@@ -83,6 +85,7 @@ export class Handler {
     }
 
     #performAnnouncement() {
+        console.debug('sending announcement')
         this.#sendToBus(
             this.#getAnnouncementEvent()
         )
@@ -90,12 +93,12 @@ export class Handler {
         this.#status = 'waiting_ack'
         this.#bus.on(
             `announcement/${this.#definition.toolId}`, 
-            this.#onAnnouncementResponse.bind(this)
+            (event: ToolEventDto) => this.#onAnnouncementResponse(event)
         )
     }
 
     #onAnnouncementResponse(event: ToolEventDto) {
-        console.debug("handling expected announcement response");
+        console.debug("handling announcement response");
         if (!event || !event.type) {
             console.error('invalid announcement response event format', event)
             this.#status = 'disconnected'
@@ -109,8 +112,11 @@ export class Handler {
                     this.#status = 'disconnected'
                     return;
                 }
-                this.#handlerId = event.handler_id
-                this.#status = 'connected'
+
+                console.info(`handler for ${this.#definition.toolId} successfully registered`);
+                this.#handlerId = event.handler_id;
+                this.#announcementId = event.announcement_id;
+                this.#status = 'connected';
                 return
             case EventTypeValue.AnnouncementNACK:
                 console.error('received NACK trying to register handler with reason:', event.reason)

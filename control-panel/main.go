@@ -17,6 +17,7 @@ func main() {
 		panic(err.Error())
 	}
 
+	log.Println("starting DB on:", configService.DatabasePath)
 	db, err := gorm.Open(sqlite.Open(configService.DatabasePath), &gorm.Config{})
 	if err != nil {
 		panic("failed connecting to database")
