@@ -39,3 +39,8 @@ export type ToolEventDto = {
 
     reason?: string;
 }
+
+export function validateEvent(event: ToolEventDto): boolean{
+    // FIXME: implement validation
+    return false;
+}
