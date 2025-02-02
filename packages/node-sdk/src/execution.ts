@@ -61,7 +61,7 @@ export class Execution {
             .catch((errorMessage) => {
                 console.debug('executing error result trap')
                 this.#bus.removeAllListeners(this.#id)
-                this.sendResult({status: 'success', message: errorMessage})
+                this.sendResult({status: 'failure', message: errorMessage})
             })
         
         this.#bus.on(
