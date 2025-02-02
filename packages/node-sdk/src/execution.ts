@@ -38,6 +38,9 @@ export class Execution {
     }
 
     start(startingEvent: ToolEventDto) {
+        this.#contextId = startingEvent.context_id;
+        console.debug('context set up', this.#contextId);
+
         this.#promise = new Promise((resolve, reject) => {
             try {
                 this.#definition
@@ -48,8 +51,6 @@ export class Execution {
                 reject(e)
             }
         });
-
-        this.#contextId = startingEvent.context_id;
 
         this.#promise
             .then((resultMessage) => {
