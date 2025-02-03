@@ -1,6 +1,6 @@
 import { Button } from "@/vendor/shadcn/components/ui/button"
 import { Card, CardContent } from "@/vendor/shadcn/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/vendor/shadcn/components/ui/form"
+import { Form, FormControl, FormField, FormItem } from "@/vendor/shadcn/components/ui/form"
 import { Input } from "@/vendor/shadcn/components/ui/input"
 import { Label } from "@/vendor/shadcn/components/ui/label"
 import { useForm } from "react-hook-form"

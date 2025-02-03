@@ -17,7 +17,7 @@ const defaultTools: ToolDto[] = [
     }
 ]
 
-export function ProjectOverviewPage(props: unknown) {
+export function ProjectOverviewPage() {
     const [selectedTool, setSelectedTool] = useState<string | undefined>();
 
     const provider = useProvider();

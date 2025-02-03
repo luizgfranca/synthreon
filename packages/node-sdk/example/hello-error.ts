@@ -1,4 +1,4 @@
-import { ToolProvider } from '../src/platform-provider'
+import { ToolProvider } from '../src/tool-provider'
 
 const tool = new ToolProvider({
     project: 'sandbox',

@@ -1,4 +1,3 @@
-import { useProvider } from "@/context/root";
 import AuthService from "@/service/auth.service";
 import { Button } from "@/vendor/shadcn/components/ui/button";
 import { Card, CardContent } from "@/vendor/shadcn/components/ui/card";

@@ -1,6 +1,6 @@
 import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
-import { ToolProvider } from './platform-provider'
+import { ToolProvider } from './tool-provider'
 import { Execution } from './execution'
 
 export type ToolComponents = {

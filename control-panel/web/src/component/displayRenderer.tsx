@@ -1,41 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
-import { Result } from "./result";
-import { Prompt } from "./prompt";
-import { TextBox } from "./textBox";
-import { ToolEventResult } from "platformlab-core/dist/tool-event/result/result.dto";
 import { ToolEventDto } from "platformlab-core";
-
-type DisplayElement = {
-    type: string;
-    label: string;
-    text: string;
-    description: string;
-    name: string;
-};
-
-type DisplayResult = {
-    success: boolean;
-    message: string;
-};
-
-type DisplayPrompt = {
-    title: string;
-    type: string;
-}
-
-type DisplayTextBox = {
-    content: string
-}
-
-type DisplayDefinitionType = 'result' | 'view' | 'prompt' | 'textbox' | string
-
-export type DisplayDefinition = {
-    type: DisplayDefinitionType;
-    elements?: DisplayElement[];
-    result?: DisplayResult;
-    prompt?: DisplayPrompt;
-    textBox?: DisplayTextBox;
-};
+import { Prompt } from "./prompt";
+import { Result } from "./result";
+import { TextBox } from "./textBox";
 
 export type Field = {
     name: string,
