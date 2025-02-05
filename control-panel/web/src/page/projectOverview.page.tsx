@@ -22,7 +22,9 @@ export function ProjectOverviewPage() {
 
     const provider = useProvider();
     const navigate = useNavigate();
-    const projectAcronym = window.location.pathname.split('/')[2];
+    const projectAcronym = window.location.pathname
+        .replace(import.meta.env.PL_PATH_PREFIX, '')
+        .split('/')[2];
 
     const project = provider.getProjects().find(project => project.acronym === projectAcronym);
 
@@ -34,7 +36,8 @@ export function ProjectOverviewPage() {
     const onLogout = () => {
         console.log('onLogout')
         AuthService.logout();
-        navigate('/login')
+        // TODO: create navigator that already computes prefix path
+        navigate(`${import.meta.env.PL_PATH_PREFIX}/login`)
     }
 
     return (

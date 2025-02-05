@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	commonmodule "platformlab/controlpanel/modules/common"
 	configurationmodule "platformlab/controlpanel/modules/configuration"
 	"platformlab/controlpanel/server/api"
 	"platformlab/controlpanel/server/api/middleware"
@@ -18,6 +19,10 @@ func StartServer(addr string, configService *configurationmodule.ConfigurationSe
 		ProjectAPI:        api.ProjectRESTApi(db),
 		ToolAPI:           api.ToolRestAPI(db),
 		AuthenticationAPI: api.AuthenticationRESTApi(db, configService.AccessTokenSecret),
+		WebHandler: &commonmodule.SPAHandler{
+			StaticPath: configService.StaticFilesDir,
+			IndexPath:  "index.html",
+		},
 	}
 
 	router := mux.NewRouter()
@@ -26,6 +31,7 @@ func StartServer(addr string, configService *configurationmodule.ConfigurationSe
 	route.SetupWebRoutes(router, appHandlers)
 
 	authenticatedRouter := router.PathPrefix("/api").Subrouter()
+	authenticatedRouter.Use(middleware.GetContentTypeMiddleware(middleware.ContentTypeJSON))
 	authenticatedRouter.Use(middleware.GetSessionMiddleware(configService.AccessTokenSecret))
 	route.SetupAuthenticatedRoutes(authenticatedRouter, appHandlers)
 

@@ -15,6 +15,13 @@ import (
 // TODO: should centralize the concept of context here,
 // right now both clientManager and prodiderManager deal with
 // htem separately
+
+// FIXME: should find a way to handle when a client connects to a tool
+// but there's no provider yet registered for that tool.
+//
+// My expectation would be that the orchestrator should keep the message
+// for some time until the provider connects, if this message expires then it
+// drops the event and sinalizes the problem to the frontend
 type OrchestratorService struct {
 	projectService *projectmodule.ProjectService
 	toolService    *toolmodule.ToolService

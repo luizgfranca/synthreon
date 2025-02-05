@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const form = useForm();
+  // TODO: create navigator that already computes prefix path
   const navigate = useNavigate();
 
   if(AuthService.isAuthenticated()) {
@@ -33,7 +34,7 @@ export function LoginPage() {
                 AuthService.tryLogin({ email, password })
                   .then(() => {
                     console.log('resolved')
-                    navigate("/")
+                    navigate(`${import.meta.env.PL_PATH_PREFIX}/`)
                   })
                   .catch(() => {
                     console.log('catched')

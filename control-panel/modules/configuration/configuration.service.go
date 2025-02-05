@@ -10,6 +10,7 @@ type ConfigurationService struct {
 	RootUserEmail     string
 	RootPassword      string
 	DatabasePath      string
+	StaticFilesDir    string
 }
 
 func TryLoadApplicationConfigFromEnvironment() (*ConfigurationService, error) {
@@ -33,10 +34,16 @@ func TryLoadApplicationConfigFromEnvironment() (*ConfigurationService, error) {
 		return nil, &commonmodule.GenericLogicError{Message: "[configuration] DATABASE required"}
 	}
 
+	staticFilesDir := os.Getenv("STATIC_FILES_DIR")
+	if staticFilesDir == "" {
+		return nil, &commonmodule.GenericLogicError{Message: "[configuration] STATIC_FILES_DIR required"}
+	}
+
 	return &ConfigurationService{
 		AccessTokenSecret: secret,
 		RootUserEmail:     rootUserEmail,
 		RootPassword:      rootUserPassword,
 		DatabasePath:      database,
+		StaticFilesDir:    staticFilesDir,
 	}, nil
 }

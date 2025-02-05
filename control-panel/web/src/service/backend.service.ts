@@ -19,7 +19,7 @@ function clearAccessToken() {
 }
 
 function goToAuthentication() {
-    return window.location.replace('/login')
+    return window.location.replace(`${import.meta.env.PL_PATH_PREFIX}/login`)
 }
 
 function request(

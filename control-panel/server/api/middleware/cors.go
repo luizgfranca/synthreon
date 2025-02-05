@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 )
 
@@ -16,12 +15,10 @@ func GetCORSMiddleware() func(next http.Handler) http.Handler {
 			 *
 			 *		 Also, there should be a middleware to add this requestId in the response header
 			 */
-			log.Println("[CORSMiddleware] Executing", r.Method, r.URL.RawPath)
 
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "*")
-			w.Header().Set("Content-Type", "application/json")
 
 			next.ServeHTTP(w, r)
 		})

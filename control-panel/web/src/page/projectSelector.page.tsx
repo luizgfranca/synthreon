@@ -7,8 +7,10 @@ export function ProjectSelector() {
   const navigate = useNavigate();
 
   if(!AuthService.isAuthenticated()) {
-    navigate('/login')
+    // TODO: create navigator that already computes prefix path
+    navigate(`${import.meta.env.PL_PATH_PREFIX}/login`)
   }
+
 
   return (
     <div className="bg-zinc-900 text-zinc-100 h-screen">

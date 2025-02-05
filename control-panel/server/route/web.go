@@ -18,6 +18,11 @@ func SetupWebRoutes(
 		http.Redirect(w, r, "/control-panel", http.StatusFound)
 	})
 
-	router.PathPrefix("/control-panel").Handler(http.StripPrefix("/control-panel", http.FileServer(http.Dir("./web/dist"))))
+	router.PathPrefix("/control-panel").Handler(
+		http.StripPrefix(
+			"/control-panel",
+			appHandlers.WebHandler,
+		),
+	)
 	router.PathPrefix("/assets").Handler(http.FileServer(http.Dir("./web/dist")))
 }

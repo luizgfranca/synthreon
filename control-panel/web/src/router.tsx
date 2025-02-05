@@ -5,15 +5,15 @@ import { ProjectSelector } from "./page/projectSelector.page";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: `${import.meta.env.PL_PATH_PREFIX}`,
     element: <ProjectSelector />,
   },
   {
-    path: "/login",
+    path: `${import.meta.env.PL_PATH_PREFIX}/login`,
     element: <LoginPage />,
   },
   {
-    path: '/project/*',
+    path: `${import.meta.env.PL_PATH_PREFIX}/project/*`,
     element: <ProjectOverviewPage />,
   }
 ]);
