@@ -36,5 +36,8 @@ func StartServer(addr string, configService *configurationmodule.ConfigurationSe
 	route.SetupAuthenticatedRoutes(authenticatedRouter, appHandlers)
 
 	log.Println("[Server] listening at", addr)
-	http.ListenAndServe(addr, router)
+	err := http.ListenAndServe(addr, router)
+	if err != nil {
+		log.Fatalln("[Server] error setting up server:", err.Error())
+	}
 }
