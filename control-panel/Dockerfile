@@ -1,13 +1,34 @@
-FROM golang:1.23 AS build
+#### BACKEND
+FROM golang:1.23 AS backend-build
 WORKDIR /app
-COPY . .
+COPY control-panel .
 RUN go build .
 
-FROM node:22
-WORKDIR /app
-COPY --from=build /app/controlpanel .
-COPY ./web/ .
-RUN mkdir /data
-RUN yarn install
+#### FRONTEND
+FROM node:22 AS frontend-build
 
-CMD ["/bin/sh", "-c", "/app/controlpanel & yarn dev:host"]
+WORKDIR /app
+RUN mkdir -p jscore
+COPY packages/js-core jscore
+
+WORKDIR /app/jscore
+RUN npm install
+RUN npm link
+
+WORKDIR /app
+RUN mkdir -p web
+WORKDIR /app/web
+COPY control-panel/web/ .
+RUN yarn install
+RUN npm link platformlab-core
+RUN yarn build
+
+#### FINAL CONTAINER
+FROM debian:bookworm AS final
+WORKDIR /app
+RUN mkdir -p web/dist
+COPY --from=backend-build /app/controlpanel .
+COPY --from=frontend-build /app/web/dist web/dist
+RUN mkdir /data
+
+CMD ["/bin/sh", "-c", "/app/controlpanel"]
