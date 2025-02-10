@@ -19,7 +19,11 @@ type Orchestrator interface {
 }
 
 // TODO: create abstractions for managerServices
+
 // FIXME: should implement client unregistration
+
+// FIXME: when a client disconnects itself it should notify the orchestrator for it to
+// able to cancel the context
 type ClientManagerService struct {
 	orchestrator Orchestrator
 

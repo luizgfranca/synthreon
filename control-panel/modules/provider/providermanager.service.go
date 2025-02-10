@@ -15,6 +15,9 @@ type Orchestrator interface {
 
 // FIXME: add project and tool deregistration handling
 // TODO: create abstractions for managerServices
+
+// FIXME: when a provider disconnects it should notify the orchestrator in order for
+// it to cancel the context
 type ProviderManagerService struct {
 	orchestrator Orchestrator
 

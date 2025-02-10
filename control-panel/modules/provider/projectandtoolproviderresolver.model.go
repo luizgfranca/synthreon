@@ -60,6 +60,7 @@ func (p *ProjectAndToolProviderResolver) Resolve(project string, tool string) (*
 		return nil, &commonmodule.GenericLogicError{Message: fmt.Sprintf("no tool found for <%s,%s>:", project, tool)}
 	}
 
+	// FIXME: enable live loading on first run
 	// TODO: should implement a better load balancing approach
 	v.Lock()
 	selected := rand.IntN(len(v.list))
