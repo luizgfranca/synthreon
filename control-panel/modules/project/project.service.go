@@ -23,6 +23,19 @@ func (p *ProjectService) FindAll() *[]Project {
 	return &projects
 }
 
+func (p *ProjectService) FindById(id uint) (*Project, error) {
+	var maybeProject *Project
+
+	result := p.Db.Where("id = ?", id).First(&maybeProject)
+	if result.Error != nil {
+		return nil, &commonmodule.GenericLogicError{
+			Message: fmt.Sprintf("element with id %d not found", id),
+		}
+	}
+
+	return maybeProject, nil
+}
+
 func (p *ProjectService) FindByAcronym(acronym string) (*Project, error) {
 	var maybeProject *Project
 

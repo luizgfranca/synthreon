@@ -22,6 +22,7 @@ func createExampleProjectsIfNotExists(db *gorm.DB) {
 
 	testProjects := []projectmodule.Project{
 		{Acronym: "sandbox", Name: "Sandbox", Description: "Sandbox project to test tool development."},
+		{Acronym: "test", Name: "Test", Description: "Test project."},
 	}
 
 	for i := range testProjects {
@@ -36,16 +37,24 @@ func createExampleProjectsIfNotExists(db *gorm.DB) {
 }
 
 func createExampleToolsIfNotExists(db *gorm.DB) {
-	s := toolmodule.ToolService{Db: db}
+	ps := projectmodule.ProjectService{Db: db}
+	ts := toolmodule.ToolService{Db: db}
 	exampleTools := []toolmodule.Tool{
 		{ProjectId: 1, Acronym: "sandbox", Description: "Sandbox tool for development testing"},
+		{ProjectId: 1, Acronym: "test-a", Description: "Tool A used for testing"},
+		{ProjectId: 2, Acronym: "sandbox", Description: "Sandbox tool for test project"},
 	}
 
 	for _, t := range exampleTools {
-		dbtool, _ := s.FindByAcronym(t.Acronym)
+		dbproject, _ := ps.FindById(t.ProjectId)
+		if dbproject == nil {
+			log.Fatalln("project for tool to be created should already exist")
+		}
+
+		dbtool, _ := ps.FindToolByAcronym(dbproject, t.Acronym)
 		if dbtool == nil {
 			log.Println("saving: ", t.Acronym)
-			s.Create(&t)
+			ts.Create(&t)
 		}
 	}
 }
