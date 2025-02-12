@@ -17,6 +17,8 @@ func SetupAuthenticatedRoutes(
 	router.HandleFunc("/project", appHandlers.ProjectAPI.CreateProject()).Methods("POST")
 	router.HandleFunc("/project/{project}/tool", appHandlers.ProjectAPI.GetToolsFromProject()).Methods("GET")
 	router.HandleFunc("/project/{project}/tool", appHandlers.ProjectAPI.CreateToolForProject()).Methods("POST")
-	router.HandleFunc("/tool/client/ws", appHandlers.ToolAPI.ToolClientWebsocket()).Methods("GET")
 
+	// FIXME: should generate a temporary one-time use token for here, or authenticate inside the websocket protocol
+	// instead of passing the session
+	router.HandleFunc("/tool/client/ws/{accessToken}", appHandlers.ToolAPI.ToolClientWebsocket()).Methods("GET")
 }

@@ -52,8 +52,7 @@ export function ToolView(props: ToolViewProps) {
     const BASE_URL = `http://${window.location.hostname}:8080`
     const ws = useMemo(() => {
         const ws = new WebSocket(
-            `${BASE_URL}/api/tool/client/ws`,
-            [ accessToken ]
+            `${BASE_URL}/api/tool/client/ws/${accessToken}`,
         )
         ws.addEventListener('open', () => {
             console.log('socket open', {
