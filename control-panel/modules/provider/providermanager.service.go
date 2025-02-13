@@ -26,8 +26,27 @@ type ProviderManagerService struct {
 	contextProviderResolver        ContextProviderResolver
 	projectAndToolProviderResolver ProjectAndToolProviderResolver
 
-	// FIXME: in the current state, the provider list will allways be growing
+	// TODO: is this list irrelevant?
 	providers []*Provider
+}
+
+// OnProviderDisconnection implements Manager.
+func (p *ProviderManagerService) OnProviderDisconnection(provider *Provider) {
+	if provider == nil {
+		log.Fatalln("provider to be unregistered from providermanager should not be null")
+	}
+
+	p.log("provider ", provider.ID, " disconnected, degeristering mappings")
+	p.projectAndToolProviderResolver.UnregisterProviderEntries(provider)
+	p.contextProviderResolver.UnregisterProviderEntries(provider)
+
+	// TODO: could this have a race condition if the provider unregisters right after connecting?
+	for i, it := range p.providers {
+		if it.ID == provider.ID {
+			commonmodule.RemoveFromUnorderedSlice(p.providers, i)
+			break // provider should not have duplicates in the list
+		}
+	}
 }
 
 func NewProviderManagerService(

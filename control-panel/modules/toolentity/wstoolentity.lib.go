@@ -123,16 +123,17 @@ func (e *WebsocketToolEntity) messageReceiverThread() {
 		e.log("message received")
 		if err != nil {
 			e.log("websocket message receiving error: ", err.Error())
-
-			if _, ok := err.(*websocket.CloseError); ok {
-				e.log("websocket conneciton closed")
-				if e.disconnectedCallback != nil {
-					// TODO: should think of a way to pass down more information
-					// 		 about the reason of the disconnection
-					e.disconnectedCallback()
-				}
+			// TODO: should handle in a smarter way different websocket message errors
+			// TODO: should think of a way to pass down more information
+			// 		 about the reason of the disconnection
+			if e.disconnectedCallback != nil {
+				e.disconnectedCallback()
 			}
-			break
+
+			// return instead of break here to avoid duplicate disconnection
+			// notifications
+			e.activeHandlerThreads.Done()
+			return
 		}
 
 		if msgtype != websocket.TextMessage {

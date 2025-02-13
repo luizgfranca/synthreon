@@ -19,6 +19,7 @@ type Manager interface {
 
 	RegisterProviderProjectAndTool(m *ProviderToolMapping)
 	DistributeEvent(e *tooleventmodule.ToolEvent)
+	OnProviderDisconnection(prov *Provider)
 }
 
 type ProviderStatus string
@@ -70,9 +71,15 @@ func (p *Provider) Status() ProviderStatus {
 }
 
 func (p *Provider) Disconnect() {
+	p.log("disconnecting")
+
 	// FIXME: see #a
+	// TODO: enable provider reconnections
 	p.SetStatus(ProviderStatusDisconnected)
-	p.entity.Close()
+	p.handlers = nil
+	p.clearContextExecutionMap()
+
+	p.manager.OnProviderDisconnection(p)
 }
 
 func (p *Provider) Start() {
@@ -83,7 +90,7 @@ func (p *Provider) Start() {
 	})
 
 	p.entity.OnDisconnect(func() {
-		p.SetStatus(ProviderStatusDisconnected)
+		p.Disconnect()
 	})
 
 	p.entity.StartHandler()
@@ -106,6 +113,13 @@ func NewProvider(
 	p.Start()
 
 	return &p
+}
+
+func (p *Provider) clearContextExecutionMap() {
+	p.contextExecutionMap.Range(func(k interface{}, v interface{}) bool {
+		p.contextExecutionMap.Delete(k)
+		return true
+	})
 }
 
 func (p *Provider) log(v ...any) {

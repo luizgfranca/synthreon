@@ -50,6 +50,21 @@ func (p *ProjectAndToolProviderResolver) Register(
 	item.Unlock()
 }
 
+func (p *ProjectAndToolProviderResolver) UnregisterProviderEntries(provider *Provider) {
+	// TODO: think of a better structure to do this in a more efficient way
+	for _, slot := range p.registry {
+		for i, it := range slot.list {
+			if it.ID == provider.ID {
+				slot.list = commonmodule.RemoveFromUnorderedSlice(slot.list, i)
+
+				// not exiting bere because the provider may be registered in
+				// another item of the registry, so just exiting the slot loop here
+				break
+			}
+		}
+	}
+}
+
 func (p *ProjectAndToolProviderResolver) Resolve(project string, tool string) (*Provider, error) {
 	key := key(project, tool)
 
@@ -58,6 +73,12 @@ func (p *ProjectAndToolProviderResolver) Resolve(project string, tool string) (*
 	p.indexLock.Unlock()
 	if !ok {
 		return nil, &commonmodule.GenericLogicError{Message: fmt.Sprintf("no tool found for <%s,%s>:", project, tool)}
+	}
+
+	if len(v.list) == 0 {
+		// there was a handler registered for this combination here before, but it has since
+		// been deregistered
+		return nil, &commonmodule.GenericLogicError{Message: fmt.Sprintf("no handler currently registered for <%s,%s>:", project, tool)}
 	}
 
 	// FIXME: enable live loading on first run

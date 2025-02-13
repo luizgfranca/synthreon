@@ -27,8 +27,25 @@ func (c *ContextProviderResolver) Register(contextId string, provider *Provider)
 }
 
 func (c *ContextProviderResolver) Unregister(contextId string) {
-	log.Println("[ContextProviderResolver] unregistering context: ", contextId)
+	c.log("unregistering context: ", contextId)
 	delete(c.contextToProviderAssignment, contextId)
+}
+
+func (c *ContextProviderResolver) UnregisterProviderEntries(p *Provider) {
+	if p == nil {
+		log.Fatalln("provider to have contexts deregistered should not be null")
+	}
+
+	// BUG: there's a race condition here, if i'm routing a new event
+	// with not assignment at the smae time, the context could have been
+	// created behind a region already passed by the loop
+	// Should use a thread-safe data structure for this
+	c.log("unregistering provider ", p.ID, "'s contexts")
+	for k, v := range c.contextToProviderAssignment {
+		if v.ID == p.ID {
+			delete(c.contextToProviderAssignment, k)
+		}
+	}
 }
 
 func (c *ContextProviderResolver) TryRouteEvent(e *tooleventmodule.ToolEvent) error {
