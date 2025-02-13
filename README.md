@@ -5,7 +5,10 @@ PlatformLab (name subject to change) is a project that aims to provide a platfor
 Here is a quick demonstration of what it can do in its current state of development:
 
 
-https://github.com/user-attachments/assets/a6ccb9be-b8a5-43b0-a4d2-37e543baf9ff
+
+
+https://github.com/user-attachments/assets/8011af74-fd08-4308-95ee-cbc180c91196
+
 
 
 ## Status 
