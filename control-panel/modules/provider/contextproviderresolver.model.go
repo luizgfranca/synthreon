@@ -18,7 +18,7 @@ func (c *ContextProviderResolver) Register(contextId string, provider *Provider)
 		c.contextToProviderAssignment = map[string]*Provider{}
 	}
 
-	log.Println("[ContextProviderResolver] registering context: ", contextId, "to provider: ", provider.ID)
+	c.log("registering context: ", contextId, "to provider: ", provider.ID)
 	if _, ok := c.contextToProviderAssignment[contextId]; ok {
 		panic("unexpected error: tryiong to register a provider to handle an already assigned context")
 	}
@@ -38,7 +38,7 @@ func (c *ContextProviderResolver) TryRouteEvent(e *tooleventmodule.ToolEvent) er
 
 	contextId := e.ContextId
 
-	log.Println("[ContextProviderResolver] trying to route event from context: ", e.ContextId)
+	c.log("trying to route event from context: ", e.ContextId)
 	if _, ok := c.contextToProviderAssignment[contextId]; !ok {
 		return &ContextNotFounError{}
 	}
@@ -65,4 +65,10 @@ type ContextNotFounError struct{}
 
 func (c *ContextNotFounError) Error() string {
 	return "context not found"
+}
+
+func (c *ContextProviderResolver) log(v ...any) {
+	x := append([]any{"[ContextProviderResolver]"}, v...)
+
+	log.Println(x...)
 }
