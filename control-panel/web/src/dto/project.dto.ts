@@ -4,3 +4,9 @@ export type ProjectDto = {
     name: string,
     description: string
 }
+
+export type NewProjectDto = {
+    acronym: string,
+    name: string,
+    description: string
+}
