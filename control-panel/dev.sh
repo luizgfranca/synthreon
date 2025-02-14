@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
+cd ../packages/js-core
+yarn build
+npm link
+cd ../../control-panel
+
 cd web
+npm link platformlab-core
 yarn build
 cd .. # web
 
