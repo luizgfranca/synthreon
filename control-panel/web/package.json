@@ -29,6 +29,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
     "react-router-dom": "^6.26.2",
+    "suspense-datasource": "^0.0.5",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.0",
