@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: `${import.meta.env.PL_PATH_PREFIX}/project/*`,
+    path: `${import.meta.env.PL_PATH_PREFIX}/project/:projectAcronym`,
     element: <ProjectOverviewPage />,
   },
   {

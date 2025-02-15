@@ -5,7 +5,7 @@ import { ToolDto } from "@/dto/tool.dto";
 import AuthService from "@/service/auth.service";
 import { ToolView } from "@/view/toolView";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const defaultTools: ToolDto[] = [
     {
@@ -22,11 +22,11 @@ export function ProjectOverviewPage() {
 
     const provider = useProvider();
     const navigate = useNavigate();
-    const projectAcronym = window.location.pathname
-        .replace(import.meta.env.PL_PATH_PREFIX, '')
-        .split('/')[2];
+    const params = useParams();
 
-    const project = provider.getProjects().find(project => project.acronym === projectAcronym);
+    const projectAcronym = params.projectAcronym;
+    const project = provider.getProjects()
+        .find(project => project.acronym === projectAcronym);
 
     const onToolSelection = (tool: ToolDto) => {
         console.log(`tool ${tool.name} selected from project ${project?.name}`)
