@@ -40,9 +40,9 @@ func createExampleToolsIfNotExists(db *gorm.DB) {
 	ps := projectmodule.ProjectService{Db: db}
 	ts := toolmodule.ToolService{Db: db}
 	exampleTools := []toolmodule.Tool{
-		{ProjectId: 1, Acronym: "sandbox", Description: "Sandbox tool for development testing"},
-		{ProjectId: 1, Acronym: "test-a", Description: "Tool A used for testing"},
-		{ProjectId: 2, Acronym: "sandbox", Description: "Sandbox tool for test project"},
+		{ProjectId: 1, Name: "Sanbox", Acronym: "sandbox", Description: "Sandbox tool for development testing"},
+		{ProjectId: 1, Name: "Test A", Acronym: "test-a", Description: "Tool A used for testing"},
+		{ProjectId: 2, Name: "Sandbox", Acronym: "sandbox", Description: "Sandbox tool for test project"},
 	}
 
 	for _, t := range exampleTools {
