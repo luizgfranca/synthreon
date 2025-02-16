@@ -1,20 +1,28 @@
 import { ProjectDatasource } from "@/datasource/project.datasource";
+import { ToolDatasource } from "@/datasource/tool.datasource";
 import { NewProjectDto, ProjectDto } from "@/dto/project.dto";
+import { ToolDto } from "@/dto/tool.dto";
 import { OnlyChildrenProps } from "@/lib/only-children-props";
 import { createContext, useContext } from "react";
 
 // TODO: refactor this to expose datasource directly
 export interface State {
   getProjects: () => ProjectDto[];
-  createProject: (data: NewProjectDto) => Promise<void>
+  createProject: (data: NewProjectDto) => Promise<void>,
+  getToolsFromProject: (projectAcronym: string) => ToolDto[]
 }
 
 const RootContext = createContext<State | null>(null);
 
 const projectsDatasource = new ProjectDatasource();
+const toolDatasource = new ToolDatasource();
 
 function getProjects() {
-  return projectsDatasource.get();
+    return projectsDatasource.get();
+}
+
+function getToolsFromProject(projectAcronym: string): ToolDto[] {
+    return toolDatasource.get(projectAcronym);
 }
 
 async function createProject(data: NewProjectDto) {
@@ -26,7 +34,8 @@ export function ContextProvider(props: OnlyChildrenProps) {
     <RootContext.Provider
       value={{
         getProjects,
-        createProject
+        createProject,
+        getToolsFromProject,
       }}
     >
       {props.children}

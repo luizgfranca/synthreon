@@ -7,16 +7,6 @@ import { ToolView } from "@/view/toolView";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const defaultTools: ToolDto[] = [
-    {
-        id: 0,
-        acronym: 'sandbox',
-        name: 'Sandbox',
-        description: 'Sandbox development environment for tools',
-        project_id: 0
-    }
-]
-
 export function ProjectOverviewPage() {
     const [selectedTool, setSelectedTool] = useState<string | undefined>();
 
@@ -40,17 +30,18 @@ export function ProjectOverviewPage() {
         navigate(`${import.meta.env.PL_PATH_PREFIX}/login`)
     }
 
-    return (
+    return projectAcronym ? (
         <div>
             <ProjectHeader projectName={project?.name ?? ''} onLogoutClick={onLogout}/>
             <div className="grid grid-cols-5 h-screen text-zinc-100">
                 <div className="col-span-1">
-                    <ProjectSidebar tools={defaultTools} onSelect={onToolSelection}/>
+                    <ProjectSidebar projectAcronym={projectAcronym} onSelect={onToolSelection}/>
                 </div>
                 <main className="col-span-4">
                     <ToolView project={project?.acronym} tool={selectedTool} />
                 </main>
             </div>
         </div>
-    )
+    ) : <div>Internal error.</div>
+    // FIXME: find a better way to handle this kind of internal error
 }
