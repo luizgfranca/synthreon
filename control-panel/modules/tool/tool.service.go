@@ -29,9 +29,15 @@ func (t *ToolService) Create(tool *Tool) (*Tool, error) {
 	var result *gorm.DB
 	var maybeExisting *Tool
 
-	commonmodule.Probe(tool.Acronym)
+	// TODO: adding project verification here for now just to
+	// 		 avoid false positives, but this verification
+	// 		 that requires awareness of project should be
+	// 		 transfered to ProjectService in the future, and
+	// 		 this function whould keep just the creation logic itself
+	result = t.Db.
+		Where("acronym = ? and project_id = ?", tool.Acronym, tool.ProjectId).
+		First(&maybeExisting)
 
-	result = t.Db.Where("acronym = ?", tool.Acronym).First(&maybeExisting)
 	if result.Error == nil {
 		log.Println("already exists", maybeExisting)
 		return nil, &commonmodule.GenericLogicError{

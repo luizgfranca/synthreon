@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	commonmodule "platformlab/controlpanel/modules/common"
 	projectmodule "platformlab/controlpanel/modules/project"
@@ -25,10 +26,12 @@ func (p *Project) getProjectParameter(r *http.Request) (*projectmodule.Project, 
 		return nil, &commonmodule.GenericLogicError{Message: "No project found in request"}
 	}
 
+	log.Println("looking for project referenced in parameter", projectAcronym)
 	project, err := p.projectService.FindByAcronym(projectAcronym)
 	if err != nil {
 		return nil, &commonmodule.GenericLogicError{Message: "Project not found"}
 	}
+	log.Println("project referenced in parameters found", project.Acronym, project)
 
 	return project, nil
 }

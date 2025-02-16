@@ -2,6 +2,7 @@ package projectmodule
 
 import (
 	"fmt"
+	"log"
 	commonmodule "platformlab/controlpanel/modules/common"
 	toolmodule "platformlab/controlpanel/modules/tool"
 
@@ -39,12 +40,15 @@ func (p *ProjectService) FindById(id uint) (*Project, error) {
 func (p *ProjectService) FindByAcronym(acronym string) (*Project, error) {
 	var maybeProject *Project
 
+	log.Println("[ProjectService] looking for project with acronym:", acronym)
 	result := p.Db.Where("acronym = ?", acronym).First(&maybeProject)
 	if result.Error != nil {
 		return nil, &commonmodule.GenericLogicError{
 			Message: fmt.Sprintf("element with acronym %s not found", acronym),
 		}
 	}
+
+	log.Println("[ProjectService] project found:", maybeProject.Acronym, maybeProject)
 
 	return maybeProject, nil
 }
@@ -79,7 +83,9 @@ func (p *ProjectService) Create(project *Project) (*Project, error) {
 func (t *ProjectService) FindTools(project *Project) *[]toolmodule.Tool {
 	var tools []toolmodule.Tool
 
-	result := t.Db.Find(&tools).Where("project_id = ?", project.ID)
+	log.Println("[ProjectService] finding tools for project", project)
+
+	result := t.Db.Where("project_id = ?", project.ID).Find(&tools)
 	if result.Error != nil {
 		panic(fmt.Sprintf("unable to query database: %s", result.Error.Error()))
 	}
