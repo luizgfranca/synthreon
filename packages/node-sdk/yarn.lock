@@ -21,11 +21,22 @@
   dependencies:
     "@types/node" "*"
 
-"platformlab-core@file:../js-core":
+platformlab-core@0.0.0:
   version "0.0.0"
-  resolved "file:../js-core"
+  resolved "https://registry.yarnpkg.com/platformlab-core/-/platformlab-core-0.0.0.tgz#4bfc700809c07abc97b3d783f342997594cbffe1"
+  integrity sha512-wSxrzm608X1TFFmNfq8oBG1ly593gU5tXoAFyBdQMgX8UaTjkRG3iE/qj80M9TxaEouTL6VWG2cmsPBNsS2jLg==
   dependencies:
     uuid "^11.0.5"
+
+prettier@^3.4.2:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.5.1.tgz#22fac9d0b18c0b92055ac8fb619ac1c7bef02fb7"
+  integrity sha512-hPpFQvHwL3Qv5AdRvBFMhnKo4tYxp0ReXiPn2bxkiohEX6mBeBwEpBSQTkD458RaaDKQMYSp4hX4UtfUTA5wDw==
+
+typescript@^5.7.3:
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.3.tgz#919b44a7dbb8583a9b856d162be24a54bf80073e"
+  integrity sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==
 
 undici-types@~6.19.2:
   version "6.19.8"
