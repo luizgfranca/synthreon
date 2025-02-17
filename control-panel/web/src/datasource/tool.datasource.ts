@@ -1,12 +1,16 @@
-import { ToolDto } from "@/dto/tool.dto";
+import { NewToolDto, ToolDto } from "@/dto/tool.dto";
 import ToolService from "@/service/tool.service";
 import { Datasource } from "suspense-datasource";
 
 export class ToolDatasource extends Datasource<ToolDto[]> {
     async fetch(projectAcronym: string): Promise<ToolDto[]> {
-        console.debug('ToolDatasource fetch', projectAcronym)
-        const result = await ToolService.queryProjectTools(projectAcronym)        
-        console.debug('ToolDatasource fetch result', result)
-        return result
+        return await ToolService.queryProjectTools(projectAcronym)        
     }
+
+    async create(projectAcronym: string, data: NewToolDto) {
+        // TODO: should add some logical validaions here
+        await ToolService.createTool(projectAcronym, data)
+        this.reset()
+    }
+
 }

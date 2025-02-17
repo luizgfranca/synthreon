@@ -1,7 +1,7 @@
 import { ProjectDatasource } from "@/datasource/project.datasource";
 import { ToolDatasource } from "@/datasource/tool.datasource";
 import { NewProjectDto, ProjectDto } from "@/dto/project.dto";
-import { ToolDto } from "@/dto/tool.dto";
+import { NewToolDto, ToolDto } from "@/dto/tool.dto";
 import { OnlyChildrenProps } from "@/lib/only-children-props";
 import { createContext, useContext } from "react";
 
@@ -10,6 +10,7 @@ export interface State {
   getProjects: () => ProjectDto[];
   createProject: (data: NewProjectDto) => Promise<void>,
   getToolsFromProject: (projectAcronym: string) => ToolDto[]
+  createTool: (projectAcronym: string, data: NewToolDto) => Promise<void>
 }
 
 const RootContext = createContext<State | null>(null);
@@ -26,7 +27,11 @@ function getToolsFromProject(projectAcronym: string): ToolDto[] {
 }
 
 async function createProject(data: NewProjectDto) {
-  return await projectsDatasource.create(data);
+    return await projectsDatasource.create(data);
+}
+
+async function createTool(projectAcronym: string, data: NewToolDto) {
+    return await toolDatasource.create(projectAcronym, data);
 }
 
 export function ContextProvider(props: OnlyChildrenProps) {
@@ -36,6 +41,7 @@ export function ContextProvider(props: OnlyChildrenProps) {
         getProjects,
         createProject,
         getToolsFromProject,
+        createTool
       }}
     >
       {props.children}

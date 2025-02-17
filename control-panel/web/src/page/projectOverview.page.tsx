@@ -31,13 +31,13 @@ export function ProjectOverviewPage() {
     }
 
     return projectAcronym ? (
-        <div>
+        <div className="flex flex-col min-h-screen">
             <ProjectHeader projectName={project?.name ?? ''} onLogoutClick={onLogout}/>
-            <div className="grid grid-cols-5 h-screen text-zinc-100">
-                <div className="col-span-1">
+            <div className="grid grid-cols-5 flex-1 text-zinc-100">
+                <div className="col-span-1 flex flex-1">
                     <ProjectSidebar projectAcronym={projectAcronym} onSelect={onToolSelection}/>
                 </div>
-                <main className="col-span-4">
+                <main className="col-span-4 flex-1">
                     <ToolView project={project?.acronym} tool={selectedTool} />
                 </main>
             </div>

@@ -5,3 +5,9 @@ export type ToolDto = {
 	name: string
 	description: string
 }
+
+export type NewToolDto = {
+	acronym: string
+	name: string
+	description: string
+}
