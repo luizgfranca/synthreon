@@ -341,6 +341,11 @@ type testManager struct {
 	DistributedEvents []*tooleventmodule.ToolEvent
 }
 
+// OnProviderDisconnection implements Manager.
+func (t *testManager) OnProviderDisconnection(prov *Provider) {
+	panic("unimplemented")
+}
+
 // DistributeEvent implements Manager.
 func (t *testManager) DistributeEvent(e *tooleventmodule.ToolEvent) {
 	t.DistributedEvents = append(t.DistributedEvents, e)

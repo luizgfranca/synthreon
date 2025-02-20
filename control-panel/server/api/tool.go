@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	commonmodule "platformlab/controlpanel/modules/common"
+	configurationmodule "platformlab/controlpanel/modules/configuration"
 	orchestratormodule "platformlab/controlpanel/modules/orchestrator"
 	projectmodule "platformlab/controlpanel/modules/project"
 	sessionmodule "platformlab/controlpanel/modules/session"
@@ -124,7 +125,7 @@ func (t *Tool) ToolProviderWebsocket() func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func ToolRestAPI(db *gorm.DB) *Tool {
+func ToolRestAPI(db *gorm.DB, configService *configurationmodule.ConfigurationService) *Tool {
 	toolService := toolmodule.ToolService{Db: db}
 	projectService := projectmodule.ProjectService{Db: db}
 
@@ -135,6 +136,7 @@ func ToolRestAPI(db *gorm.DB) *Tool {
 		orchestratorService: orchestratormodule.NewOrchestratorService(
 			&projectService,
 			&toolService,
+			configService,
 		),
 	}
 }

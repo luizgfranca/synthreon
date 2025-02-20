@@ -3,6 +3,7 @@ package orchestratormodule
 import (
 	"log"
 	clientmodule "platformlab/controlpanel/modules/client"
+	configurationmodule "platformlab/controlpanel/modules/configuration"
 	projectmodule "platformlab/controlpanel/modules/project"
 	providermodule "platformlab/controlpanel/modules/provider"
 	sessionmodule "platformlab/controlpanel/modules/session"
@@ -25,6 +26,7 @@ import (
 type OrchestratorService struct {
 	projectService *projectmodule.ProjectService
 	toolService    *toolmodule.ToolService
+	configService  *configurationmodule.ConfigurationService
 
 	providerManager *providermodule.ProviderManagerService
 	clientManager   *clientmodule.ClientManagerService
@@ -33,14 +35,19 @@ type OrchestratorService struct {
 func NewOrchestratorService(
 	projectService *projectmodule.ProjectService,
 	toolService *toolmodule.ToolService,
+	configService *configurationmodule.ConfigurationService,
 ) *OrchestratorService {
 	o := OrchestratorService{
 		projectService: projectService,
 		toolService:    toolService,
+		configService:  configService,
 	}
 
 	o.providerManager = providermodule.NewProviderManagerService(
-		&o, projectService, toolService,
+		&o,
+		projectService,
+		toolService,
+		o.configService.RetryTimeoutSeconds,
 	)
 
 	o.clientManager = clientmodule.NewCLientManagerService(

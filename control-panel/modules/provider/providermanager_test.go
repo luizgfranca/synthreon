@@ -83,6 +83,7 @@ func TestBasicProviderManagerBehavior(t *testing.T) {
 		orchestrator,
 		&projectService,
 		&toolService,
+		100,
 	)
 
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

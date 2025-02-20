@@ -17,7 +17,7 @@ import (
 func StartServer(addr string, configService *configurationmodule.ConfigurationService, db *gorm.DB) {
 	appHandlers := &server.AppHandlers{
 		ProjectAPI:        api.ProjectRESTApi(db),
-		ToolAPI:           api.ToolRestAPI(db),
+		ToolAPI:           api.ToolRestAPI(db, configService),
 		AuthenticationAPI: api.AuthenticationRESTApi(db, configService.AccessTokenSecret),
 		WebHandler: &commonmodule.SPAHandler{
 			StaticPath: configService.StaticFilesDir,

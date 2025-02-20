@@ -7,6 +7,7 @@ import (
 	toolmodule "platformlab/controlpanel/modules/tool"
 	"platformlab/controlpanel/modules/toolentity"
 	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	"time"
 )
 
 type Orchestrator interface {
@@ -25,6 +26,9 @@ type ProviderManagerService struct {
 
 	contextProviderResolver        ContextProviderResolver
 	projectAndToolProviderResolver ProjectAndToolProviderResolver
+
+	retryTimeoutSeconds int
+	dlq                 *EventDLQ
 
 	// TODO: is this list irrelevant?
 	providers []*Provider
@@ -49,19 +53,35 @@ func (p *ProviderManagerService) OnProviderDisconnection(provider *Provider) {
 	}
 }
 
+// NewProviderManagerService:
+// orchestrator, projectService and toolServie are not nullable
+// retryTimeoutSeconds default = 0 (no retry)
 func NewProviderManagerService(
 	orchestrator Orchestrator,
 	projectService *projectmodule.ProjectService,
 	toolService *toolmodule.ToolService,
+	retryTimeoutSeconds int,
 ) *ProviderManagerService {
-	return &ProviderManagerService{
-		orchestrator:   orchestrator,
-		projectService: projectService,
+	if orchestrator == nil || projectService == nil || toolService == nil {
+		log.Fatalln("tried to start ProviderManager with null dependency", orchestrator, projectService, toolService)
+	}
 
+	p := ProviderManagerService{
+		orchestrator:        orchestrator,
+		projectService:      projectService,
+		retryTimeoutSeconds: retryTimeoutSeconds,
+
+		dlq:                            newEventDLQ(retryTimeoutSeconds),
 		contextProviderResolver:        ContextProviderResolver{},
 		projectAndToolProviderResolver: ProjectAndToolProviderResolver{},
 		providers:                      []*Provider{},
 	}
+
+	// TODO: Should i really use a daemon here? This was simpler when only the providers ran on the
+	// background
+	go p.dlq.sweepService()
+
+	return &p
 }
 
 // DistributeEvent implements Manager.
@@ -77,9 +97,39 @@ func (p *ProviderManagerService) DistributeEvent(e *tooleventmodule.ToolEvent) {
 	p.orchestrator.ForwardEventToClient(e)
 }
 
+// retryFailedEventsFromProjectAndTool:
+// presumes already verified project and tool acronyms,
+// failed retries are readded to queue by underlying behavior
+func (p *ProviderManagerService) retryFailedEventsFromProjectAndTool(projectAcronym string, toolAcronym string) {
+	// FIXME: needs to wait for a bit because the internal registration happens
+	// before the ACK message is sent to the provider
+	// instead of this, which is error prone, there are two options to think about:
+	// - a status for the handlers that should be controlled here for when their registration if fully done
+	// - consider registering the handler only after the ACK message is sent
+	time.Sleep(1 * time.Second)
+	p.log("retrying failed events")
+
+	eventToRetry := p.dlq.popFromProjectAndTool(projectAcronym, toolAcronym)
+	for eventToRetry != nil {
+		p.log("retrying event", eventToRetry)
+		// we don't save the event again in teh DLQ here because there's already a logic to
+		// put it there again in the send event logic,
+		// this function assumes that it will behave the same as if it was a new event send.
+		p.SendEvent(eventToRetry)
+
+		eventToRetry = p.dlq.popFromProjectAndTool(projectAcronym, toolAcronym)
+	}
+}
+
 // RegisterProviderProjectAndTool implements Manager.
+// m is not nullable,
 func (p *ProviderManagerService) RegisterProviderProjectAndTool(m *ProviderToolMapping) {
+	if m == nil {
+		log.Fatalln("in manager provider registration, but provider mapping is null")
+	}
+
 	p.projectAndToolProviderResolver.Register(m.Project.Acronym, m.Tool.Acronym, m.Provider)
+	go p.retryFailedEventsFromProjectAndTool(m.Project.Acronym, m.Tool.Acronym)
 }
 
 // FindProject implements Manager.
@@ -135,8 +185,24 @@ func (p *ProviderManagerService) SendEvent(e *tooleventmodule.ToolEvent) error {
 			p.log("context not found, creating")
 			provider, err := p.projectAndToolProviderResolver.Resolve(e.Project, e.Tool)
 			if err != nil {
-				p.log("provider resolution error: ", err.Error())
-				return err
+				p.log("could not resolve by project and tool, adding event to dead letter queue")
+
+				// this function is also called on retries, this should be considered when doning this logic
+				// in this case, this behavior already re-registers the event in the dead letter queue
+				// if the retry fails
+				// in this registration, the event is saved with a new expiration, i don't think this is a
+				// problem, but it should also be considered
+				// if this is removed, "retryFailedEventsFromProjectAndTool" or its current equivalent should be
+				// reviewed
+				p.dlq.register(e)
+
+				// Not sure about this behavior,
+				// In this case for example, i don't think it should be an error yet because
+				// there's a chance that the event will be reprocessed and will be fine.
+				// But should the orchestrator have the knowlege of this??
+				// TODO: should reevaluate when thinking of a way to handle geenral errros
+				// in event communication.
+				return nil
 			}
 
 			p.log("registering new context")
