@@ -1,10 +1,9 @@
-import { DisplayRenderer, Field } from "@/component/displayRenderer";
+import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { EmptyState } from "@/component/emptyState";
+import Compositor from "@/component/compositor";
 import BackendService from "@/service/backend.service";
-import { useMemo, useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
 import { ToolEventDto } from 'platformlab-core';
-
 
 const ToolEventEncoder = {
     encodeV0: (event: ToolEventDto): string => {
@@ -12,140 +11,137 @@ const ToolEventEncoder = {
         const data = JSON.stringify(event)
         return `${prefix}|${data}`
     },
-    decodeV0: (input: string): {result?: ToolEventDto, error?: Error} => {
+    decodeV0: (input: string): ToolEventDto => {
         const [prefix, rawData] = input.split('|')
-        if(prefix !== 'v0.0') {
-            return {
-                error: new Error('unsupported protovol version')
-            }
+        if (prefix !== 'v0.0') {
+            throw new Error('unsupported protovol version')
         }
 
-        return {
-            result: JSON.parse(rawData)
-        }
+        return JSON.parse(rawData)
     }
 }
 
+
 type ToolViewProps = {
-    project?: string,
-    tool?: string,
+    project: string,
+    tool: string
+}
+
+enum ToolState {
+    STARTUP = 'STARTUP',
+    OPENNING = 'OPENNING',
+    OPEN = 'OPEN',
 }
 
 type ExecutionContext = {
     contextId?: string;
     terminalId?: string;
+    state: ToolState
 }
 
-function sendEvent(ws: WebSocket, event: ToolEventDto) {
-    console.log('sending event: ', event);
-    ws.send(ToolEventEncoder.encodeV0(event))
-}
-
-export function ToolView(props: ToolViewProps) {
-    const [event, setEvent] = useState<ToolEventDto | null>(null)
-    const [executionContext, setExecutionContext] = useState<ExecutionContext | undefined>()
-    const [resetToggle, setResetToggle] = useState<boolean>()
-    console.log('e', event)
-
-    const accessToken = BackendService.getAccessToken() ?? ''
-    
-    const BASE_URL = `http://${window.location.hostname}:8080`
-    const ws = useMemo(() => {
-        const ws = new WebSocket(
-            `${BASE_URL}/api/tool/client/ws/${accessToken}`,
-        )
-        ws.addEventListener('open', () => {
-            console.log('socket open', {
-                project: props.project,
-                tool: props.tool
-            })
-
-            if (props.project && props.tool) {
-                sendEvent(ws, {
-                    type: 'interaction/open',
-                    project: props.project,
-                    tool: props.tool
-                })
-            } else {
-                throw new Error('project ant tool should be defined to send an interaction')
-            }
-        })
-
-        ws.addEventListener('message', (e) => {
-            console.log(`recv: ${e.data}`)
-            const {result, error} = ToolEventEncoder.decodeV0(e.data)
-            if (!error && result) {
-                if(!executionContext) {
-                    console.debug('setting execution context', {
-                        contextId: result.context_id,
-                        terminalId: result.terminal_id
-                    })
-
-                    setExecutionContext({
-                        contextId: result.context_id,
-                        terminalId: result.terminal_id
-                    })
-                }
-                setEvent(result)
-            } else {
-                console.error('error decoding event: ', error)
-            }
-        })
-
-        setResetToggle(false)
-
-        return ws
-    }, [props, resetToggle])
- 
-    const sendInputInteraction = (fields: Field[]) => {
-        if (props.project && props.tool) {
-            sendEvent(ws, {
-                type: 'interaction/input',
-                project: props.project,
-                tool: props.tool,
-                context_id: executionContext?.contextId,
-                terminal_id: executionContext?.terminalId,
-                input: {
-                    fields
-                }
-            })
-        } else {
-            throw new Error('project ant tool should be defined to send an interaction')
-        }
-    }
-
-    const reset = () => {
-        console.log('RESET')
-        setResetToggle(true)
-        setExecutionContext(undefined)
-    }
-
-    if (!props.project || !props.tool) {
-        return (
-            <div className="flex pt-10 items-center">
-                <EmptyState>Select a tool to use.</EmptyState>
-            </div>
-        )
-    }
-
-    if(!event || (!event.display && !event.result)) {
-        console.debug('no event', event)
-        return (
-            <div className="flex pt-10">
-
-                <EmptyState>Waiting for provider...</EmptyState>
-            </div>
-        )       
-    }
+function empty(message: string) {
     return (
-        <div className="text-zinc-100 h-screen pt-10">
-            <div className="container mx-auto px-4">
-                <DisplayRenderer 
-                    event={event}
-                    onSumission={(fields) => sendInputInteraction(fields)}
-                    resetCallback={() => reset()}
-                />
-            </div>
+        <div className="flex pt-10 items-center">
+            <EmptyState>{message}</EmptyState>
         </div>
     )
 }
+
+// dont need to verify if project and tool are different because of the key property
+// that will reset the component if they are
+const ToolView = (props: ToolViewProps) => {
+    const [context, setContext] = useState<ExecutionContext>({ state: ToolState.STARTUP })
+    const [eventHistory, setEventHistory] = useState<ToolEventDto[]>([]);
+    console.debug('rendering tool with context', context, props)
+
+    const reset = useCallback(() => {
+        console.debug('reset')
+        setEventHistory([]);
+        setContext({ state: ToolState.STARTUP, })
+    }, [setContext])
+
+    const accessToken = BackendService.getAccessToken() ?? ''
+    const BASE_URL = `http://${window.location.hostname}:8080`
+    const { sendMessage, lastMessage, readyState } = useWebSocket(`${BASE_URL}/api/tool/client/ws/${accessToken}`);
+
+    const sendEvent = useCallback((toSend: ToolEventDto) => {
+        const event: ToolEventDto = {
+            ...toSend,
+            project: props.project,
+            tool: props.tool
+        }
+
+        // TODO: could validate event here in the future for sanity checking
+        console.debug('sending event:', event);
+        const message = ToolEventEncoder.encodeV0(event);
+        sendMessage(message);
+    }, [])
+
+    useEffect(() => {
+        if (lastMessage !== null) {
+            let lastEvent: ToolEventDto;
+            try {
+                console.debug('message received', lastMessage);
+                // TODO: validate received event
+                lastEvent = ToolEventEncoder.decodeV0(lastMessage.data)
+                setEventHistory((prev) => prev.concat(lastEvent));
+            } catch (e) {
+                // FIXME: error screen for this
+                console.error('unsupported event received', e);
+            }
+        }
+    }, [lastMessage]);
+
+    let lastEvent = eventHistory[eventHistory.length - 1];
+    switch (context.state) {
+        case ToolState.STARTUP:
+            if (readyState == ReadyState.OPEN) {
+                setContext({ state: ToolState.OPENNING })
+                sendEvent({ type: 'interaction/open' })
+                // FIXME: loading screen for this
+                return empty('Starting tool...')
+            }
+            // FIXME: loading screen for this
+            return empty('Connecting...')
+        case ToolState.OPENNING:
+            if (!lastEvent) { 
+                return empty('Waiting response...');
+            }
+
+            try {
+                // TODO: validate received event
+                setContext({
+                    contextId: lastEvent.context_id,
+                    terminalId: lastEvent.terminal_id,
+                    state: ToolState.OPEN
+                })
+
+                // FIXME: loading screen for this
+                return empty('Openning...');
+            } catch (e) {
+                // FIXME: error screen for this
+                return empty('Unsupported event received...');
+            }
+        case ToolState.OPEN:
+            if (!lastEvent) { 
+                console.error('state is OPEN but last event is not here yet', props, context);
+                return empty('internal error, invalid state ...');
+            }
+
+            if (context.contextId && context.terminalId) {
+                console.debug('loaded', { ...props, ...context });
+                return <Compositor
+                    key={`${context.contextId}:${context.terminalId}`}
+                    contextId={context.contextId}
+                    terminalId={context.terminalId}
+                    lastEvent={lastEvent}
+                    reset={reset} 
+                    sendEvent={sendEvent}
+                />
+            }
+            return empty('should be unreacheable')
+    }
+}
+
+
+export default ToolView;

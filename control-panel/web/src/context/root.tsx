@@ -35,17 +35,17 @@ async function createTool(projectAcronym: string, data: NewToolDto) {
 }
 
 export function ContextProvider(props: OnlyChildrenProps) {
-  return (
-    <RootContext.Provider
-      value={{
-        getProjects,
-        createProject,
-        getToolsFromProject,
-        createTool
-      }}
-    >
-      {props.children}
-    </RootContext.Provider>
+    return (
+        <RootContext.Provider
+            value={{
+                getProjects,
+                createProject,
+                getToolsFromProject,
+                createTool
+            }}
+        >
+        {props.children}
+        </RootContext.Provider>
   );
 }
 
