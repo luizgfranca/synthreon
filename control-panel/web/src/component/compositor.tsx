@@ -35,7 +35,7 @@ export default function Compositor(props: CompositorProps) {
     }, [props.sendEvent])
 
     return (
-        <div className="text-zinc-100 h-screen pt-10">
+        <div className="text-zinc-100 flex-1 pt-10">
             <div className="container mx-auto px-4">
                 <DisplayRenderer
                     event={props.lastEvent}
