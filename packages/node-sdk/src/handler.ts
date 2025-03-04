@@ -121,8 +121,8 @@ export class Handler {
                 return
             case EventTypeValue.AnnouncementNACK:
                 console.error('received NACK trying to register handler with reason:', event.reason)
-                this.#status = 'disconnected'
-                return;
+                process.exit(1);
+
             default:
                 console.error('invalid event type was received:', event)
                 this.#status = 'disconnected'
