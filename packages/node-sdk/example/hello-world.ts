@@ -9,8 +9,8 @@ const tool = new ToolProvider({
     },
     tools: [
         {
-            toolId: 'sandbox',
-            toolFunction: async () => {
+            id: 'sandbox',
+            function: async () => {
                 return 'Hello World!'
             },
         },

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
-import { ToolComponents, ToolHandlerDefinition } from './handler'
-import { ComponentFactory } from './tool-components'
+import { ToolHandlerDefinition } from './handler'
+import { ComponentFactory, ToolComponents } from './tool-components'
 import { EventTypeValue, ToolEventDto } from 'platformlab-core'
 import { v4 as uuid } from 'uuid'
 import { InputDefinition } from 'platformlab-core/tool-event/input/input.dto'
@@ -44,7 +44,7 @@ export class Execution {
         this.#promise = new Promise((resolve, reject) => {
             try {
                 this.#definition
-                    .toolFunction(this.#components)
+                    .function(this.#components)
                     .then((resultMessage) => resolve(resultMessage))
                     .catch((e) => reject(e))
             } catch (e) {
@@ -123,7 +123,7 @@ export class Execution {
     }
 
     #sendEvent(event: ToolEventDto) {
-        event.tool = this.#definition.toolId
+        event.tool = this.#definition.id
         event.execution_id = this.#id
         event.context_id = this.#contextId
 

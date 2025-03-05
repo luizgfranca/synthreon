@@ -9,8 +9,8 @@ const tool = new ToolProvider({
     },
     tools: [
         {
-            toolId: 'sandbox',
-            toolFunction: async ({ io }) => {
+            id: 'sandbox',
+            function: async ({ io }) => {
                 await io.textBox(`
                     Lorem ipsum dolor sit amet. Qui quibusdam enim ut voluptatem cupiditate et unde consequatur quo dolorum nemo est porro voluptatum et dolores omnis. Non rerum dolorum et nobis ullam et perspiciatis debitis aut dolorem debitis qui voluptas veniam.
                     

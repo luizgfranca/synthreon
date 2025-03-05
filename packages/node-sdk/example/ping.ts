@@ -9,11 +9,13 @@ const tool = new ToolProvider({
     },
     tools: [
         {
-            toolId: 'sandbox',
-            toolFunction: async ({ io }) => {
+            id: 'sandbox',
+            function: async ({ io }) => {
                 const input = await io.prompt(
-                    'Input ping to receive pong',
-                    'string'
+                    {
+                        title: 'Simple ping test',
+                        type: 'string'
+                    }
                 )
 
                 if (input.toLowerCase() === 'ping') {

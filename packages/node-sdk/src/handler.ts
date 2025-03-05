@@ -1,18 +1,11 @@
-import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue } from 'platformlab-core'
+import { PromptType, ToolEventDto, EventTypeValue } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
-import { ToolProvider } from './tool-provider'
 import { Execution } from './execution'
-
-export type ToolComponents = {
-    io: {
-        prompt: (description: string, type: PromptType) => Promise<string>
-        textBox: (content: string) => Promise<void>
-    }
-}
+import { ToolComponents } from './tool-components'
 
 export type ToolHandlerDefinition = {
-    toolId: string, 
-    toolFunction: ToolFunction
+    id: string,
+    function: ToolFunction
 }
 
 export type ToolFunction = (kit: ToolComponents) => Promise<string>;
@@ -32,7 +25,7 @@ export class Handler {
     constructor(
         definition: ToolHandlerDefinition,
         bus: EventEmitter
-    )  {
+    ) {
         this.#definition = definition
         this.#bus = bus
         this.#status = 'announcing'
@@ -46,11 +39,11 @@ export class Handler {
 
     #handleEvent(event: ToolEventDto) {
         console.debug('[handler] handling event', event)
-        if(this.#status !== 'connected') {
+        if (this.#status !== 'connected') {
             console.warn('DROPPING event becuase handler is in disconnected state')
         }
 
-        switch(event.type) {
+        switch (event.type) {
             case EventTypeValue.InteractionOpen:
                 this.#onOpenEvent(event)
                 return
@@ -77,7 +70,7 @@ export class Handler {
 
     #forwardExecutionEvent(event: ToolEventDto) {
         event.handler_id = this.#handlerId;
-        event.tool = this.#definition.toolId;
+        event.tool = this.#definition.id;
         this.#sendToBus(event)
     }
 
@@ -86,10 +79,10 @@ export class Handler {
         this.#sendToBus(
             this.#getAnnouncementEvent()
         )
-        
+
         this.#status = 'waiting_ack'
         this.#bus.on(
-            `announcement/${this.#definition.toolId}`, 
+            `announcement/${this.#definition.id}`,
             (event: ToolEventDto) => this.#onAnnouncementResponse(event)
         )
     }
@@ -102,7 +95,7 @@ export class Handler {
             return;
         }
 
-        switch(event.type) {
+        switch (event.type) {
             case EventTypeValue.AnnouncementACK:
                 if (!event.handler_id) {
                     console.error('invalid ack response event format', event)
@@ -110,14 +103,14 @@ export class Handler {
                     return;
                 }
 
-                console.info(`handler for ${this.#definition.toolId} successfully registered`);
+                console.info(`handler for ${this.#definition.id} successfully registered`);
                 this.#handlerId = event.handler_id;
                 this.#announcementId = event.announcement_id;
                 this.#status = 'connected';
 
                 console.debug(`registering handler ${this.#handlerId} to handle events`)
                 this.#bus.on(this.#handlerId, (event: ToolEventDto) => this.#handleEvent(event))
-                
+
                 return
             case EventTypeValue.AnnouncementNACK:
                 console.error('received NACK trying to register handler with reason:', event.reason)
@@ -133,7 +126,7 @@ export class Handler {
     #getAnnouncementEvent(): ToolEventDto {
         return {
             type: EventTypeValue.AnnouncementHandler,
-            tool: this.#definition.toolId,
+            tool: this.#definition.id,
         }
     }
 }

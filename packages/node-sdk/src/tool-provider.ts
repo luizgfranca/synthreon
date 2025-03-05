@@ -210,7 +210,7 @@ export class ToolProvider {
                     throw new Error('internal error: trying to do announcement without an active bus')
                 }
 
-                console.debug('creating handler:', definition.toolId)
+                console.debug('creating handler:', definition.id)
                 return new Handler(definition, this.#bus)
             }
         )
