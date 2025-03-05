@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 cd ../packages/js-core
 yarn build
-npm link
+yarn link
 cd ../../control-panel
 
 cd web
-npm link platformlab-core
+yarn link platformlab-core
 yarn build
 cd .. # web
 
