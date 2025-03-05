@@ -17,7 +17,7 @@ function SuccessIcon(props: { success: boolean }) {
 export function Result(props: ResultProps) {
     return (
       <div>
-        <div className="result grid grid-cols-5 gap-4 bg-zinc-800 p-5 rounded-md text-lg">
+        <div className="result grid grid-cols-5 gap-4 bg-zinc-800 p-5 rounded-t-sm text-lg">
           <SuccessIcon success={props.success} />
           <div className="col-span-4 flex items-center">
             <div className="w-full">
@@ -25,7 +25,7 @@ export function Result(props: ResultProps) {
             </div>
           </div>
         </div>
-        <div className="grid justify-items-end p-5 border-2 bg-zinc-900">
+        <div className="grid justify-items-end p-5 border-2 rounded-b-sm bg-zinc-900">
           <Button onClick={props.onConfirm}>OK</Button>
         </div>
       </div>
