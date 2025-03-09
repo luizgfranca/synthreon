@@ -26,7 +26,7 @@ export function Result(props: ResultProps) {
           </div>
         </div>
         <div className="grid justify-items-end p-5 border-2 rounded-b-sm bg-zinc-900">
-          <Button onClick={props.onConfirm}>OK</Button>
+          <Button onClick={props.onConfirm} autoFocus>OK</Button>
         </div>
       </div>
     );

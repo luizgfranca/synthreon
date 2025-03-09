@@ -18,7 +18,10 @@ export function Prompt(props: PromptProps) {
         <Card className="space-y-8">
             <CardContent className="py-5 px-10 bg-zinc-850">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit((e) => props.onSubmit(e.prompt))} className="space-y-8">
+                    <form 
+                        onSubmit={form.handleSubmit((e) => props.onSubmit(e.prompt))} 
+                        className="space-y-8"
+                    >
                         <FormField
                             control={form.control}
                             name="prompt"
@@ -26,7 +29,7 @@ export function Prompt(props: PromptProps) {
                                 <FormItem>
                                     <Label className="text-lg">{props.title}</Label>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input autoFocus {...field} />
                                     </FormControl>
                                 </FormItem>
                             )}
