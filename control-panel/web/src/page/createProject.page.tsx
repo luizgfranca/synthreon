@@ -10,14 +10,29 @@ import { Input } from '@/vendor/shadcn/components/ui/input'
 import { Textarea } from '@/vendor/shadcn/components/ui/textarea'
 import { Button } from '@/vendor/shadcn/components/ui/button'
 import { useForm } from 'react-hook-form'
-import { Form, FormField, FormItem } from '@/vendor/shadcn/components/ui/form'
+import { Form, FormField, FormItem, FormMessage } from '@/vendor/shadcn/components/ui/form'
 import { useProvider } from '@/context/root'
 import { NewProjectDto } from '@/dto/project.dto'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const createProjectSchema = z.object({
+    acronym: z.string()
+        .nonempty()
+        .regex(/^[a-zA-Z0-9#\$*._-]+$/, {message: 'invalid character(s) in identifier string'})
+        .min(3, {message: 'identifier should have at least 3 digits'}),
+    name: z.string()
+        .nonempty()
+        .min(3),
+    description: z.string().optional()
+})
 
 const CreateProjectPage = () => {
     const provider = useProvider()
-    const form = useForm()
+    const form = useForm<z.infer<typeof createProjectSchema>>({
+        resolver: zodResolver(createProjectSchema)
+    })
     const navigate = useNavigate()
 
     const handleSubmit = (e: unknown) => {
@@ -61,6 +76,7 @@ const CreateProjectPage = () => {
                                                     className="w-full border-zinc-200 focus:ring-zinc-400"
                                                     {...field}
                                                 />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -83,6 +99,7 @@ const CreateProjectPage = () => {
                                                     className="w-full border-zinc-200 focus:ring-zinc-400"
                                                     {...field}
                                                 />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -105,6 +122,7 @@ const CreateProjectPage = () => {
                                                     className="w-full min-h-32 border-zinc-200 focus:ring-zinc-400"
                                                     {...field}
                                                 />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />

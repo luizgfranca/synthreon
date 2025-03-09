@@ -10,17 +10,31 @@ import { Input } from '@/vendor/shadcn/components/ui/input'
 import { Textarea } from '@/vendor/shadcn/components/ui/textarea'
 import { Button } from '@/vendor/shadcn/components/ui/button'
 import { useForm } from 'react-hook-form'
-import { Form, FormField, FormItem } from '@/vendor/shadcn/components/ui/form'
+import { Form, FormField, FormItem, FormMessage } from '@/vendor/shadcn/components/ui/form'
 import { useProvider } from '@/context/root'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ProjectHeader } from '@/component/projectHeader'
 import { NewToolDto } from '@/dto/tool.dto'
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod'
 
+const createToolSchema = z.object({
+    acronym: z.string()
+        .nonempty()
+        .regex(/^[a-zA-Z0-9#\$*._-]+$/, {message: 'invalid character(s) in identifier string'})
+        .min(3, {message: 'identifier should have at least 3 digits'}),
+    name: z.string()
+        .nonempty()
+        .min(3),
+    description: z.string()
+})
 // TODO: very similar to create project logic
 //       there should be a way to generalize this
 const CreateToolPage = () => {
     const provider = useProvider()
-    const form = useForm()
+    const form = useForm<z.infer<typeof createToolSchema>>({
+        resolver: zodResolver(createToolSchema)
+    })
     const navigate = useNavigate()
 
     const params = useParams();
@@ -88,6 +102,7 @@ const CreateToolPage = () => {
                                                         className="w-full border-zinc-200 focus:ring-zinc-400"
                                                         {...field}
                                                     />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -110,6 +125,7 @@ const CreateToolPage = () => {
                                                         className="w-full border-zinc-200 focus:ring-zinc-400"
                                                         {...field}
                                                     />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -132,6 +148,7 @@ const CreateToolPage = () => {
                                                         className="w-full min-h-32 border-zinc-200 focus:ring-zinc-400"
                                                         {...field}
                                                     />
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
