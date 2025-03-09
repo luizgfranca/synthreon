@@ -34,7 +34,9 @@ export function Prompt(props: PromptProps) {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Submit</Button>
+                        <div className="flex flex-col items-end">
+                            <Button type="submit">Submit</Button>
+                        </div>
                     </form>
                 </Form>
                 
