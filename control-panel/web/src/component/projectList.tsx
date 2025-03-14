@@ -1,26 +1,27 @@
 import { useProvider } from "@/context/root";
 import { OverviewSelectionButton } from "./overviewSelectionButton";
-import { OverviewSelectionOption } from "./overviewSelectionOption";
 import { useNavigate } from "react-router-dom";
+import Selection from "./selection";
 
 export function ProjectList() {
-  const provider = useProvider();
-  const navigate = useNavigate()
+    const provider = useProvider();
+    const navigate = useNavigate()
+    // TODO: create navigator that already computes prefix path
 
-  return (
-    <div className="space-y-4">
-      {provider.getProjects().map((project) => (
-        <OverviewSelectionOption
-          title={project.name}
-          description={project.description}
-          acronym={project.acronym}
-        />
-      ))}
-
-      <OverviewSelectionButton 
-        label="Create a new project" 
-        onClick={() => navigate(`${import.meta.env.PL_PATH_PREFIX}/create-project`)}
-      />
-    </div>
-  );
+    return (
+        <Selection
+            options={
+                provider.getProjects().map((project) => ({
+                key: project.acronym,
+                title: project.name,
+                description: project.description
+            }))}
+            onSelect={(key) => navigate(`${import.meta.env.PL_PATH_PREFIX}/project/${key}`)}
+        >
+            <OverviewSelectionButton
+                label="Create a new project"
+                onClick={() => navigate(`${import.meta.env.PL_PATH_PREFIX}/create-project`)}
+            />
+        </Selection>
+    )
 }
