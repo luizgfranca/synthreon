@@ -1,4 +1,4 @@
-import { DisplayTypeValue, PromptType } from 'platformlab-core'
+import { DisplayTypeValue, PromptType, SelectionDisplay } from 'platformlab-core'
 import { Execution } from './execution'
 import { InputDefinition } from 'platformlab-core/tool-event/input/input.dto'
 
@@ -7,14 +7,45 @@ export type PromptParams = {
     title: string,
     type: PromptType
 }
+
+export type SelectionParams = SelectionDisplay;
+
+
 export type PromptFunction = (params: PromptParams) => Promise<string>
 export type TextBoxFunction = (content: string) => Promise<void>
+export type SelectionFunction = (params: SelectionParams) => Promise<string>
 
 export type ToolComponents = {
     io: {
-        prompt: PromptFunction
-        textBox: TextBoxFunction
+        prompt: PromptFunction;
+        textBox: TextBoxFunction;
+        selection: SelectionFunction;
     }
+}
+
+function instantiateSelection(execution: Execution): SelectionFunction {
+    return (selection: SelectionParams) =>
+        new Promise((resolve, reject) => {
+            console.debug('dispatching selection display', selection)
+            execution.sendDisplay({
+                type: DisplayTypeValue.Selection,
+                selection
+            })
+
+            // FIXME: should handle if callback is not valid anymore
+            execution.onNextInput((input: InputDefinition) => {
+                if (input.fields.length == 0) {
+                    return reject("protocol Error: did not receive field result");
+                }
+
+                const value = input.fields[0].value
+                if (!value) {
+                    return reject("protocol Error: value did not arrive with input interaction");
+                }
+
+                resolve(value)
+            })
+        })
 }
 
 function instantiatePrompt(execution: Execution): PromptFunction {
@@ -64,6 +95,7 @@ function instantiateComponents(execution: Execution): ToolComponents {
         io: {
             prompt: instantiatePrompt(execution),
             textBox: instantiateTextBox(execution),
+            selection: instantiateSelection(execution)
         },
     }
 }

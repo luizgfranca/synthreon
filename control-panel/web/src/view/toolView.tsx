@@ -104,7 +104,7 @@ const ToolView = (props: ToolViewProps) => {
             // FIXME: loading screen for this
             return empty('Connecting...')
         case ToolState.OPENNING:
-            if (!lastEvent) { 
+            if (!lastEvent) {
                 return empty('Waiting response...');
             }
 
@@ -123,7 +123,7 @@ const ToolView = (props: ToolViewProps) => {
                 return empty('Unsupported event received...');
             }
         case ToolState.OPEN:
-            if (!lastEvent) { 
+            if (!lastEvent) {
                 console.error('state is OPEN but last event is not here yet', props, context);
                 return empty('internal error, invalid state ...');
             }
@@ -135,7 +135,7 @@ const ToolView = (props: ToolViewProps) => {
                     contextId={context.contextId}
                     terminalId={context.terminalId}
                     lastEvent={lastEvent}
-                    reset={reset} 
+                    reset={reset}
                     sendEvent={sendEvent}
                 />
             }

@@ -2,6 +2,7 @@ import { ToolEventDto } from "platformlab-core";
 import { Prompt } from "./prompt";
 import { Result } from "./result";
 import { TextBox } from "./textBox";
+import Selection from "./selection";
 
 export type Field = {
     name: string,
@@ -54,6 +55,26 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
                     {props.event.display.textBox?.content ?? ''}
                 </TextBox>
             )
+        case "selection":
+            const definition = props.event.display?.selection;
+
+            if (!definition) {
+                throw new Error('selecte specified but no definition for it found')
+            }
+            return (
+                <Selection 
+                    introduction={definition.description}
+                    options={definition.options.map((option) => ({
+                        key: option.key,
+                        title: option.text,
+                        description: option.description
+                    }))}
+                    onSelect={(key) => props.onSumission([{
+                        name: 'selection',
+                        value: key
+                    }])}
+                />
+        )
     }
 
 }

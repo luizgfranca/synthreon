@@ -1,6 +1,6 @@
 export interface SelectionOptionProps {
     title: string;
-    description: string;
+    description?: string;
     onClick: () => void;
 }
 
