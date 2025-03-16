@@ -21,10 +21,10 @@
   dependencies:
     "@types/node" "*"
 
-platformlab-core@0.0.0:
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/platformlab-core/-/platformlab-core-0.0.0.tgz#4bfc700809c07abc97b3d783f342997594cbffe1"
-  integrity sha512-wSxrzm608X1TFFmNfq8oBG1ly593gU5tXoAFyBdQMgX8UaTjkRG3iE/qj80M9TxaEouTL6VWG2cmsPBNsS2jLg==
+platformlab-core@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/platformlab-core/-/platformlab-core-0.1.0.tgz#8ee5ec57cbd25ad799aa6ba4ac19daa608da15c5"
+  integrity sha512-JPXTNeGeYi53hC6bkBlTeiLuwFeEWbVFICjlMJQRrXuBBc5dnwxMNlE2DrmgN+ZfWti3GTjT+9U7zMuRkN+kWA==
   dependencies:
     uuid "^11.0.5"
 
