@@ -24,5 +24,5 @@ func main() {
 	}
 
 	application.Setup(configService, db)
-	server.StartServer(":8080", configService, db)
+	server.StartServer(":25256", configService, db)
 }

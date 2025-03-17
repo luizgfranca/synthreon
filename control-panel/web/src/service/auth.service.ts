@@ -6,7 +6,7 @@ import BackendService from "./backend.service"
 
 export type QueryProjecstDto = ProjectDto[]
 
-const BASE_URL = `http://${window.location.hostname}:8080`
+const BASE_URL = `http://${window.location.hostname}:25256`
 
 function tryLogin(body: LoginRequestDto) {
     return new Promise((resolve, reject) => {

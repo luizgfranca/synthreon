@@ -1,4 +1,4 @@
-const BASE_URL = `http://${window.location.hostname}:8080`
+const BASE_URL = `http://${window.location.hostname}:25256`
 const STORAGE_SESSION_TOKEN_KEY = 'accessToken'
 
 const DEFAULT_HEADERS = {

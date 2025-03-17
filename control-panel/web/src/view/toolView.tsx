@@ -61,7 +61,7 @@ const ToolView = (props: ToolViewProps) => {
     }, [setContext])
 
     const accessToken = BackendService.getAccessToken() ?? ''
-    const BASE_URL = `http://${window.location.hostname}:8080`
+    const BASE_URL = `http://${window.location.hostname}:25256`
     const { sendMessage, lastMessage, readyState } = useWebSocket(`${BASE_URL}/api/tool/client/ws/${accessToken}`);
 
     const sendEvent = useCallback((toSend: ToolEventDto) => {
