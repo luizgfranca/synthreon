@@ -21,22 +21,22 @@
   dependencies:
     "@types/node" "*"
 
-platformlab-core@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/platformlab-core/-/platformlab-core-0.1.0.tgz#8ee5ec57cbd25ad799aa6ba4ac19daa608da15c5"
-  integrity sha512-JPXTNeGeYi53hC6bkBlTeiLuwFeEWbVFICjlMJQRrXuBBc5dnwxMNlE2DrmgN+ZfWti3GTjT+9U7zMuRkN+kWA==
+platformlab-core@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/platformlab-core/-/platformlab-core-0.1.2.tgz#4ab3e91102f98a7b1831c52a6bdea7679e893a76"
+  integrity sha512-F7osaXetMq8Cc3J9juVZkSUeRBWEnVBmTwjzak1N81ZvczszsDCvzNWp+khzUEpjP234MCj4bOIzw8B2TRbcvg==
   dependencies:
     uuid "^11.0.5"
 
 prettier@^3.4.2:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.5.1.tgz#22fac9d0b18c0b92055ac8fb619ac1c7bef02fb7"
-  integrity sha512-hPpFQvHwL3Qv5AdRvBFMhnKo4tYxp0ReXiPn2bxkiohEX6mBeBwEpBSQTkD458RaaDKQMYSp4hX4UtfUTA5wDw==
+  version "3.5.3"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-3.5.3.tgz"
+  integrity sha512-QQtaxnoDJeAkDvDKWCLiwIXkTgRhwYDEQCghU9Z6q03iyek/rxRh/2lC3HB7P8sWT2xC/y5JDctPLBIGzHKbhw==
 
 typescript@^5.7.3:
-  version "5.7.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.3.tgz#919b44a7dbb8583a9b856d162be24a54bf80073e"
-  integrity sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==
+  version "5.8.2"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-5.8.2.tgz"
+  integrity sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==
 
 undici-types@~6.19.2:
   version "6.19.8"
@@ -44,9 +44,9 @@ undici-types@~6.19.2:
   integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
 
 uuid@^11.0.5:
-  version "11.0.5"
-  resolved "https://registry.npmjs.org/uuid/-/uuid-11.0.5.tgz"
-  integrity sha512-508e6IcKLrhxKdBbcA2b4KQZlLVp2+J5UwQ6F7Drckkc5N9ZJwFa4TgWtsww9UG8fGHbm6gbV19TdM5pQ4GaIA==
+  version "11.1.0"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-11.1.0.tgz"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 ws@^8.18.0:
   version "8.18.0"

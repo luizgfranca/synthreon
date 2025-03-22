@@ -1,7 +1,7 @@
 import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue, ToolEventEncoder } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
 import WebSocket, { RawData } from 'ws'
-import { Handler, ToolHandlerDefinition } from './handler'
+import { Handler, ToolFunction, ToolHandlerDefinition } from './handler'
 
 type UserCredentials = {
     username: string
@@ -12,7 +12,7 @@ type PlatformToolConnectionOptions = {
     endpoint: string,
     project: string,
     credentials: UserCredentials,
-    tools: ToolHandlerDefinition[]
+    tools?: ToolHandlerDefinition[]
 }
 
 type ConnectionStatus = 'connected' 
@@ -36,12 +36,19 @@ export class ToolProvider {
     #handlers: Handler[]
 
     constructor(options: PlatformToolConnectionOptions) {
-        this.#endpoint = options.endpoint
-        this.#credentials = options.credentials
-        this.#status = 'disconnected'
-        this.#project = options.project
-        this.#handlerDefinitions = options.tools
-        this.#handlers = []
+        this.#endpoint = options.endpoint;
+        this.#credentials = options.credentials;
+        this.#status = 'disconnected';
+        this.#project = options.project;
+        this.#handlerDefinitions = options.tools ? options.tools : [];
+        this.#handlers = [];
+    }
+
+    tool(id: string, fn: ToolFunction) {
+        this.#handlerDefinitions.push({
+            id,
+            function: fn
+        });
     }
 
     listen() {

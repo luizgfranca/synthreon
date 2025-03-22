@@ -1,31 +1,25 @@
 import { ToolProvider } from '../src/tool-provider'
 
-const tool = new ToolProvider({
+const provider = new ToolProvider({
     project: 'sandbox',
     endpoint: 'ws://localhost:25256/ws/tool/provider',
     credentials: {
         username: 'test@test.com',
         password: 'password',
     },
-    tools: [
-        {
-            id: 'sandbox',
-            function: async ({ io }) => {
-                const input = await io.prompt(
-                    {
-                        title: 'Simple ping test',
-                        type: 'string'
-                    }
-                )
-
-                if (input.toLowerCase() === 'ping') {
-                    return 'pong'
-                }
-
-                throw '...'
-            },
-        },
-    ],
 })
 
-tool.listen()
+provider.tool('sandbox', async ({ io }) => {
+    const input = await io.prompt({
+        title: 'Try to input a ping command',
+        type: 'string'
+    })
+
+    if (input.toLowerCase() === 'ping') {
+        return 'pong';
+    }
+
+    throw 'You failed.'
+})
+
+provider.listen()
