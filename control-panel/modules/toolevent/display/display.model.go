@@ -10,7 +10,8 @@ const (
 	DisplayTypePrompt      DisplayType = "prompt"
 	DisplayTypeInformation DisplayType = "information"
 	DisplayTypeTextBox     DisplayType = "textbox"
-    DisplayTypeSelelction  DisplayType = "selection"
+	DisplayTypeSelelction  DisplayType = "selection"
+	DisplayTypeTable       DisplayType = "table"
 )
 
 type DisplayDefinition struct {
@@ -19,6 +20,7 @@ type DisplayDefinition struct {
 	Information *InformationDisplay `json:"information"`
 	TextBox     *TextBoxDisplay     `json:"textBox"`
 	Selection   *SelectionDisplay   `json:"selection"`
+	Table       *TableDisplay       `json:"table"`
 }
 
 func (d *DisplayDefinition) IsValid() bool {
@@ -39,9 +41,13 @@ func (d *DisplayDefinition) IsValid() bool {
 		return false
 	}
 
-    if d.Type == DisplayTypeSelelction && (d.Selection == nil || !d.Selection.IsValid()) {
+	if d.Type == DisplayTypeSelelction && (d.Selection == nil || !d.Selection.IsValid()) {
 		return false
 	}
+
+    if d.Type == DisplayTypeTable && (d.Table == nil || !d.Table.IsValid()) {
+        return false
+    }
 
 	return true
 }

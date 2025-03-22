@@ -14,6 +14,7 @@ function MaybeTitle(props: {title?: string}) {
 
 
 export default function Table(props: TableProps) {
+    console.debug('rendering table', props);
     return (
         <div className="w-full">
             <MaybeTitle title={props.title} />

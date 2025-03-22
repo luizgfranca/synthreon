@@ -1,4 +1,4 @@
-import { DisplayTypeValue, PromptType, SelectionDisplay } from 'platformlab-core'
+import { DisplayTypeValue, PromptType, SelectionDisplay, TableDisplay } from 'platformlab-core'
 import { Execution } from './execution'
 import { InputDefinition } from 'platformlab-core/tool-event/input/input.dto'
 
@@ -9,17 +9,19 @@ export type PromptParams = {
 }
 
 export type SelectionParams = SelectionDisplay;
-
+export type TableParams = TableDisplay;
 
 export type PromptFunction = (params: PromptParams) => Promise<string>
 export type TextBoxFunction = (content: string) => Promise<void>
 export type SelectionFunction = (params: SelectionParams) => Promise<string>
+export type TableFunction = (params: TableParams) => Promise<void>
 
 export type ToolComponents = {
     io: {
         prompt: PromptFunction;
         textBox: TextBoxFunction;
         selection: SelectionFunction;
+        table: TableFunction;
     }
 }
 
@@ -90,12 +92,24 @@ function instantiateTextBox(execution: Execution): TextBoxFunction {
         })
 }
 
+function instantiateTable(execution: Execution): TableFunction {
+    return (params: TableParams) => 
+        new Promise((resolve, _) => {
+            execution.sendDisplay({
+                type: DisplayTypeValue.Table,
+                table: params
+            })
+            execution.onNextInput(() => resolve());
+        })
+}
+
 function instantiateComponents(execution: Execution): ToolComponents {
     return {
         io: {
             prompt: instantiatePrompt(execution),
             textBox: instantiateTextBox(execution),
-            selection: instantiateSelection(execution)
+            selection: instantiateSelection(execution),
+            table: instantiateTable(execution)
         },
     }
 }

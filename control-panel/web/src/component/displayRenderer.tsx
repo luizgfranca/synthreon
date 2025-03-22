@@ -3,6 +3,8 @@ import { Prompt } from "./prompt";
 import { Result } from "./result";
 import { TextBox } from "./textBox";
 import Selection from "./selection";
+import DisplayBox from "./displayBox";
+import Table from "./table";
 
 export type Field = {
     name: string,
@@ -12,7 +14,7 @@ export type Field = {
 export type DsiplayRendererProps = {
     event: ToolEventDto
     onSumission: (fields: Field[]) => void
-    
+
     resetCallback: () => void
 }
 
@@ -23,7 +25,7 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
         const success = props.event.result && props.event.result.status === 'success' || false
 
         return (
-            <Result 
+            <Result
                 success={success}
                 onConfirm={() => props.resetCallback()}
             >
@@ -32,15 +34,16 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
         )
     }
 
-    if(!props.event.display) {
+    if (!props.event.display) {
         throw new Error('expected display but its not defined')
     }
 
-    switch(props.event?.display.type) {
+    let definition;
+    switch (props.event?.display.type) {
         case 'prompt':
             return (
-                <Prompt 
-                    title={props.event.display.prompt?.title ?? ''} 
+                <Prompt
+                    title={props.event.display.prompt?.title ?? ''}
                     onSubmit={(value) => props.onSumission([{
                         name: 'prompt',
                         value
@@ -56,13 +59,13 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
                 </TextBox>
             )
         case "selection":
-            const definition = props.event.display?.selection;
+            definition = props.event.display?.selection;
 
             if (!definition) {
-                throw new Error('selecte specified but no definition for it found')
+                throw new Error('select specified but no definition for it found')
             }
             return (
-                <Selection 
+                <Selection
                     introduction={definition.description}
                     options={definition.options.map((option) => ({
                         key: option.key,
@@ -74,7 +77,20 @@ export function DisplayRenderer(props: DsiplayRendererProps) {
                         value: key
                     }])}
                 />
-        )
+            )
+        case "table":
+            definition = props.event.display?.table;
+            if (!definition) {
+                throw new Error('table specified but no definition for it found')
+            }
+
+            return (
+                <DisplayBox
+                    onConfirm={() => props.onSumission([])}
+                >
+                    <Table {...definition} />
+                </DisplayBox>
+            )
     }
 
 }
