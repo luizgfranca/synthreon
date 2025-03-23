@@ -1,11 +1,17 @@
-import { PromptType, ToolEventDto, EventTypeValue } from 'platformlab-core'
+import { PromptType, ToolEventDto, EventTypeValue, ToolProperties } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
 import { Execution } from './execution'
 import { ToolComponents } from './tool-components'
 
+export type HandlerExtraOptions = {
+    name?: string;
+    description?: string;
+}
+
 export type ToolHandlerDefinition = {
     id: string,
-    function: ToolFunction
+    function: ToolFunction,
+    extraOptions?: HandlerExtraOptions
 }
 
 export type ToolFunction = (kit: ToolComponents) => Promise<string>;
@@ -124,9 +130,14 @@ export class Handler {
     }
 
     #getAnnouncementEvent(): ToolEventDto {
+        const properties: ToolProperties | undefined = this.#definition.extraOptions
+            ? this.#definition.extraOptions
+            : undefined
+
         return {
             type: EventTypeValue.AnnouncementHandler,
             tool: this.#definition.id,
+            tool_properties: properties
         }
     }
 }

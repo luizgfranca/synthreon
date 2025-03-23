@@ -20,10 +20,16 @@ export const EventTypeValue = {
 
 export type EventType = typeof EventTypeValue[keyof typeof EventTypeValue]
 
+export type ToolProperties = {
+    name?: string;
+    description?: string;
+}
+
 export type ToolEventDto = {
     type: EventType;
     project?: string;
     tool?: string;
+    tool_properties?: ToolProperties;
 
     announcement_id?: string;
     provider_id?: string;

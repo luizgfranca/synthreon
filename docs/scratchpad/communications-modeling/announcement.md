@@ -36,7 +36,11 @@ v0.0|{
     "project": "proj-x",
     "tool": "tool-y",
     "handshake_id": UUID,
-    "provider_id": UUID
+    "provider_id": UUID,
+    "tool_properties": {
+        "name": "Tool X",
+        "description": "x's description"
+    }
 }
 ```
 

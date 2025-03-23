@@ -152,8 +152,9 @@ const (
 type ToolEvent struct {
 	Type EventType `json:"type"`
 
-	Project string `json:"project"`
-	Tool    string `json:"tool"`
+	Project        string          `json:"project"`
+	Tool           string          `json:"tool"`
+	ToolProperties *ToolProperties `json:"tool_properties"`
 
 	HandshakeId string `json:"announcement_id"`
 	ProviderId  string `json:"provider_id"`

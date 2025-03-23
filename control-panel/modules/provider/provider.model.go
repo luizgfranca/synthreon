@@ -16,7 +16,10 @@ import (
 type Manager interface {
 	FindProject(acronym string) (*projectmodule.Project, error)
 	FindTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
-    TryCreateTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error)
+	// TryCreateTool:
+	// project is not nullable,
+	// toolProperties is nullable,
+	TryCreateTool(project *projectmodule.Project, acronym string, properties *tooleventmodule.ToolProperties) (*toolmodule.Tool, error)
 
 	RegisterProviderProjectAndTool(m *ProviderToolMapping)
 	DistributeEvent(e *tooleventmodule.ToolEvent)
@@ -352,29 +355,29 @@ func (p *Provider) handleAnnouncementEvent(e *tooleventmodule.ToolEvent) {
 
 	tool, err := p.manager.FindTool(p.Project, e.Tool)
 	if err != nil {
-        p.log("error: unable to find tool: ", err.Error())
-        p.log("requesting creation")
-        tool, err = p.manager.TryCreateTool(p.Project, e.Tool)
+		p.log("error: unable to find tool: ", err.Error())
+		p.log("requesting creation")
+		tool, err = p.manager.TryCreateTool(p.Project, e.Tool, e.ToolProperties)
 
-        if err != nil {
-            p.log("did not auto create tool: ", err.Error())
-            p.log("error: provider tried to announce invalid tool", e.Tool)
-            nack := tooleventmodule.ToolEvent{
-                Type:        tooleventmodule.EventTypeAnnouncementNACK,
-                Project:     p.Project.Acronym,
-                Tool:        e.Tool,
-                HandshakeId: p.handshakeId,
-                ProviderId:  p.ID,
-                Reason:      "tool.invalid",
-            }
-            if ok := p.SendEvent(&nack); !ok {
-                p.log("not ok")
-                p.Disconnect()
-                return
-            }
+		if err != nil {
+			p.log("did not auto create tool: ", err.Error())
+			p.log("error: provider tried to announce invalid tool", e.Tool)
+			nack := tooleventmodule.ToolEvent{
+				Type:        tooleventmodule.EventTypeAnnouncementNACK,
+				Project:     p.Project.Acronym,
+				Tool:        e.Tool,
+				HandshakeId: p.handshakeId,
+				ProviderId:  p.ID,
+				Reason:      "tool.invalid",
+			}
+			if ok := p.SendEvent(&nack); !ok {
+				p.log("not ok")
+				p.Disconnect()
+				return
+			}
 
-            return
-        }
+			return
+		}
 	}
 
 	created := p.createHandler(tool)

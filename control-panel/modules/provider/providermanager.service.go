@@ -172,7 +172,11 @@ func (p *ProviderManagerService) FindTool(project *projectmodule.Project, acrony
 	return maybeTool, nil
 }
 
-func (p *ProviderManagerService) TryCreateTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error) {
+func (p *ProviderManagerService) TryCreateTool(
+	project *projectmodule.Project,
+	acronym string,
+	props *tooleventmodule.ToolProperties,
+) (*toolmodule.Tool, error) {
 	if !p.shouldAutoCreateTool {
 		p.log("ALLOW_TOOL_AUTOCREATION flag unmarked, will not create new tool")
 		return nil, &commonmodule.GenericLogicError{Message: "should not autocreate non existing tools"}
@@ -184,12 +188,19 @@ func (p *ProviderManagerService) TryCreateTool(project *projectmodule.Project, a
 		Name:        acronym,
 		Description: "",
 	}
-    tool, err := p.toolService.Create(&t)
-    if err != nil {
-        return nil, err
-    }
 
-    return tool, nil
+	if props != nil {
+		t.Name = props.Name
+		t.Description = props.Description
+	}
+
+	p.log("trying to create tool: ", t)
+	tool, err := p.toolService.Create(&t)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool, nil
 }
 
 func (p *ProviderManagerService) EntityConnection(entity toolentity.ToolEntityAdapter) {

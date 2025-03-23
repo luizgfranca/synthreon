@@ -14,7 +14,7 @@ export default function DisplayBox(props: DisplayBoxProps) {
                     {props.children} 
                 </div>
              <div className="grid justify-items-end p-5 border-t-0 bg-zinc-900/90">
-                <Button className="rounded-none px-8" onClick={props.onConfirm}>OK</Button>
+                <Button className="rounded-none px-8" onClick={props.onConfirm} autoFocus>OK</Button>
             </div>
         </div>
     </div>

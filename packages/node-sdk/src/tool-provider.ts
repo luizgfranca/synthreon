@@ -1,12 +1,14 @@
 import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue, ToolEventEncoder } from 'platformlab-core'
 import { EventEmitter } from 'node:events'
 import WebSocket, { RawData } from 'ws'
-import { Handler, ToolFunction, ToolHandlerDefinition } from './handler'
+import { Handler, HandlerExtraOptions, ToolFunction, ToolHandlerDefinition } from './handler'
 
 type UserCredentials = {
     username: string
     password: string
 }
+
+type ToolOptions = HandlerExtraOptions;
 
 type PlatformToolConnectionOptions = {
     endpoint: string,
@@ -46,10 +48,11 @@ export class ToolProvider {
 
     // FIXME: think of the better way to allow the definition of a name and a description
     //        for the tool here, mainly for when it has to be autocreated 
-    tool(id: string, fn: ToolFunction) {
+    tool(id: string, fn: ToolFunction, options?: ToolOptions) {
         this.#handlerDefinitions.push({
             id,
-            function: fn
+            function: fn,
+            extraOptions: options ? options : {}
         });
     }
 
