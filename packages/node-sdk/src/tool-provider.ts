@@ -44,6 +44,8 @@ export class ToolProvider {
         this.#handlers = [];
     }
 
+    // FIXME: think of the better way to allow the definition of a name and a description
+    //        for the tool here, mainly for when it has to be autocreated 
     tool(id: string, fn: ToolFunction) {
         this.#handlerDefinitions.push({
             id,

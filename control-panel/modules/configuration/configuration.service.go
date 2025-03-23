@@ -4,6 +4,7 @@ import (
 	"os"
 	commonmodule "platformlab/controlpanel/modules/common"
 	"strconv"
+	"strings"
 )
 
 type ConfigurationService struct {
@@ -13,6 +14,9 @@ type ConfigurationService struct {
 	DatabasePath        string
 	StaticFilesDir      string
 	RetryTimeoutSeconds int
+
+	// optional parameters
+	AllowToolAutoCreation bool
 }
 
 func TryLoadApplicationConfigFromEnvironment() (*ConfigurationService, error) {
@@ -50,12 +54,21 @@ func TryLoadApplicationConfigFromEnvironment() (*ConfigurationService, error) {
 		return nil, &commonmodule.GenericLogicError{Message: "[configuration] RETRY_TIMEOUT_SECONDS should be an integer"}
 	}
 
+	allowToolAutoCreation := true
+	allowToolAutoCreationStr := os.Getenv("ALLOW_TOOL_AUTOCREATION")
+	if strings.ToUpper(allowToolAutoCreationStr) == "TRUE" {
+		allowToolAutoCreation = true
+	} else if strings.ToUpper(allowToolAutoCreationStr) == "FALSE" {
+		allowToolAutoCreation = false
+	}
+
 	return &ConfigurationService{
-		AccessTokenSecret:   secret,
-		RootUserEmail:       rootUserEmail,
-		RootPassword:        rootUserPassword,
-		DatabasePath:        database,
-		StaticFilesDir:      staticFilesDir,
-		RetryTimeoutSeconds: retryTimeoutSeconds,
+		AccessTokenSecret:     secret,
+		RootUserEmail:         rootUserEmail,
+		RootPassword:          rootUserPassword,
+		DatabasePath:          database,
+		StaticFilesDir:        staticFilesDir,
+		RetryTimeoutSeconds:   retryTimeoutSeconds,
+		AllowToolAutoCreation: allowToolAutoCreation,
 	}, nil
 }

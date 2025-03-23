@@ -48,6 +48,7 @@ func NewOrchestratorService(
 		projectService,
 		toolService,
 		o.configService.RetryTimeoutSeconds,
+        o.configService.AllowToolAutoCreation,
 	)
 
 	o.clientManager = clientmodule.NewCLientManagerService(

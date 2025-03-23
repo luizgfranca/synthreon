@@ -23,12 +23,14 @@ type ProviderManagerService struct {
 	orchestrator Orchestrator
 
 	projectService *projectmodule.ProjectService
+	toolService    *toolmodule.ToolService
 
 	contextProviderResolver        ContextProviderResolver
 	projectAndToolProviderResolver ProjectAndToolProviderResolver
 
-	retryTimeoutSeconds int
-	dlq                 *EventDLQ
+	retryTimeoutSeconds  int
+	shouldAutoCreateTool bool
+	dlq                  *EventDLQ
 
 	// TODO: is this list irrelevant?
 	providers []*Provider
@@ -61,15 +63,18 @@ func NewProviderManagerService(
 	projectService *projectmodule.ProjectService,
 	toolService *toolmodule.ToolService,
 	retryTimeoutSeconds int,
+	shouldAutoCreateTool bool,
 ) *ProviderManagerService {
 	if orchestrator == nil || projectService == nil || toolService == nil {
 		log.Fatalln("tried to start ProviderManager with null dependency", orchestrator, projectService, toolService)
 	}
 
 	p := ProviderManagerService{
-		orchestrator:        orchestrator,
-		projectService:      projectService,
-		retryTimeoutSeconds: retryTimeoutSeconds,
+		orchestrator:         orchestrator,
+		projectService:       projectService,
+		toolService:          toolService,
+		retryTimeoutSeconds:  retryTimeoutSeconds,
+		shouldAutoCreateTool: shouldAutoCreateTool,
 
 		dlq:                            newEventDLQ(retryTimeoutSeconds),
 		contextProviderResolver:        ContextProviderResolver{},
@@ -165,6 +170,26 @@ func (p *ProviderManagerService) FindTool(project *projectmodule.Project, acrony
 
 	p.log("tool found:", maybeTool)
 	return maybeTool, nil
+}
+
+func (p *ProviderManagerService) TryCreateTool(project *projectmodule.Project, acronym string) (*toolmodule.Tool, error) {
+	if !p.shouldAutoCreateTool {
+		p.log("ALLOW_TOOL_AUTOCREATION flag unmarked, will not create new tool")
+		return nil, &commonmodule.GenericLogicError{Message: "should not autocreate non existing tools"}
+	}
+
+	t := toolmodule.Tool{
+		ProjectId:   project.ID,
+		Acronym:     acronym,
+		Name:        acronym,
+		Description: "",
+	}
+    tool, err := p.toolService.Create(&t)
+    if err != nil {
+        return nil, err
+    }
+
+    return tool, nil
 }
 
 func (p *ProviderManagerService) EntityConnection(entity toolentity.ToolEntityAdapter) {
