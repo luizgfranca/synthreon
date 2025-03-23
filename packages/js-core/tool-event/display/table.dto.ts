@@ -3,5 +3,6 @@ export type TableColumnDictionary = Record<string, string>;
 export type TableDisplay = {
     title?: string;
     columns: TableColumnDictionary;
-    content: Array<Record<string, unknown>>;
+    // FIXME: should support other types in the future
+    content: Array<Record<string, string>>;
 }

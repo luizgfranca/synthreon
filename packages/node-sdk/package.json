@@ -1,6 +1,6 @@
 {
   "name": "platformlab-sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "PlatformLab SDK for tool development",
   "author": "luizgfc@proton.me",
   "license": "AGPL-3.0",
@@ -12,7 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "platformlab-core": "0.1.2",
+    "platformlab-core": "0.1.3",
     "uuid": "^11.0.5",
     "ws": "^8.18.0"
   },
