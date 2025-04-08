@@ -1,6 +1,6 @@
 package projectmodule
 
-import toolmodule "platformlab/controlpanel/modules/tool"
+import toolmodule "synthreon/modules/tool"
 
 type Project struct {
 	ID          uint   `json:"id"`

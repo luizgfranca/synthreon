@@ -1,9 +1,9 @@
 package server
 
 import (
-	commonmodule "platformlab/controlpanel/modules/common"
-	orchestratormodule "platformlab/controlpanel/modules/orchestrator"
-	"platformlab/controlpanel/server/api"
+	commonmodule "synthreon/modules/common"
+	orchestratormodule "synthreon/modules/orchestrator"
+	"synthreon/server/api"
 )
 
 type AppHandlers struct {

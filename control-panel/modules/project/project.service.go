@@ -3,8 +3,8 @@ package projectmodule
 import (
 	"fmt"
 	"log"
-	commonmodule "platformlab/controlpanel/modules/common"
-	toolmodule "platformlab/controlpanel/modules/tool"
+	commonmodule "synthreon/modules/common"
+	toolmodule "synthreon/modules/tool"
 
 	"gorm.io/gorm"
 )

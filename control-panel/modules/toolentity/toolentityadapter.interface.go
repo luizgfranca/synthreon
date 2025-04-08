@@ -1,6 +1,6 @@
 package toolentity
 
-import tooleventmodule "platformlab/controlpanel/modules/toolevent"
+import tooleventmodule "synthreon/modules/toolevent"
 
 type ToolEntityAdapter interface {
 	StartHandler() error

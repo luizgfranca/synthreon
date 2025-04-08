@@ -1,7 +1,7 @@
 package providermodule
 
 import (
-	toolmodule "platformlab/controlpanel/modules/tool"
+	toolmodule "synthreon/modules/tool"
 
 	"github.com/google/uuid"
 )

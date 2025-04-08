@@ -2,8 +2,8 @@ package tooleventmodule
 
 import (
 	"fmt"
-	tooleventdisplay "platformlab/controlpanel/modules/toolevent/display"
-	tooleventresult "platformlab/controlpanel/modules/toolevent/result"
+	tooleventdisplay "synthreon/modules/toolevent/display"
+	tooleventresult "synthreon/modules/toolevent/result"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"

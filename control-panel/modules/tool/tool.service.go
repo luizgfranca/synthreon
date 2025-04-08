@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	commonmodule "platformlab/controlpanel/modules/common"
+	commonmodule "synthreon/modules/common"
 
 	"gorm.io/gorm"
 )

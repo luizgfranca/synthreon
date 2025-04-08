@@ -3,12 +3,12 @@ package server
 import (
 	"log"
 	"net/http"
-	commonmodule "platformlab/controlpanel/modules/common"
-	configurationmodule "platformlab/controlpanel/modules/configuration"
-	"platformlab/controlpanel/server/api"
-	"platformlab/controlpanel/server/api/middleware"
-	server "platformlab/controlpanel/server/handler"
-	"platformlab/controlpanel/server/route"
+	commonmodule "synthreon/modules/common"
+	configurationmodule "synthreon/modules/configuration"
+	"synthreon/server/api"
+	"synthreon/server/api/middleware"
+	server "synthreon/server/handler"
+	"synthreon/server/route"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"

@@ -2,11 +2,11 @@ package providermodule
 
 import (
 	"log"
-	commonmodule "platformlab/controlpanel/modules/common"
-	projectmodule "platformlab/controlpanel/modules/project"
-	toolmodule "platformlab/controlpanel/modules/tool"
-	"platformlab/controlpanel/modules/toolentity"
-	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	commonmodule "synthreon/modules/common"
+	projectmodule "synthreon/modules/project"
+	toolmodule "synthreon/modules/tool"
+	"synthreon/modules/toolentity"
+	tooleventmodule "synthreon/modules/toolevent"
 	"time"
 )
 

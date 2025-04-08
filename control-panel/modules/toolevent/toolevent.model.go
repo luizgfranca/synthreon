@@ -1,9 +1,9 @@
 package tooleventmodule
 
 import (
-	tooleventdisplay "platformlab/controlpanel/modules/toolevent/display"
-	tooleventinput "platformlab/controlpanel/modules/toolevent/input"
-	tooleventresult "platformlab/controlpanel/modules/toolevent/result"
+	tooleventdisplay "synthreon/modules/toolevent/display"
+	tooleventinput "synthreon/modules/toolevent/input"
+	tooleventresult "synthreon/modules/toolevent/result"
 	"slices"
 )
 

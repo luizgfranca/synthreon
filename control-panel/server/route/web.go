@@ -3,7 +3,7 @@ package route
 import (
 	"log"
 	"net/http"
-	server "platformlab/controlpanel/server/handler"
+	server "synthreon/server/handler"
 
 	"github.com/gorilla/mux"
 )

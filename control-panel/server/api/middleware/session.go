@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	commonmodule "platformlab/controlpanel/modules/common"
-	sessionmodule "platformlab/controlpanel/modules/session"
-	"platformlab/controlpanel/server/api"
+	commonmodule "synthreon/modules/common"
+	sessionmodule "synthreon/modules/session"
+	"synthreon/server/api"
 	"strings"
 
 	"github.com/gorilla/mux"

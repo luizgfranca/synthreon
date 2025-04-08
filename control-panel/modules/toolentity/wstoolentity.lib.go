@@ -2,7 +2,7 @@ package toolentity
 
 import (
 	"log"
-	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	tooleventmodule "synthreon/modules/toolevent"
 	"sync"
 
 	"github.com/google/uuid"

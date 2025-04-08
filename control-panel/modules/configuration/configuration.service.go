@@ -2,7 +2,7 @@ package configurationmodule
 
 import (
 	"os"
-	commonmodule "platformlab/controlpanel/modules/common"
+	commonmodule "synthreon/modules/common"
 	"strconv"
 	"strings"
 )

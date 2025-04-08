@@ -1,6 +1,6 @@
-# PlatformLab
+# Synthreon
 
-PlatformLab (name subject to change) is a project that aims to provide a platform for an application developer, a team, or an entire company to create internal tools for quick automation and simplify the management of an application's resources.
+Synthreon is a project that aims to provide a platform for an application developer, a team, or an entire company to create internal tools for quick automation and simplify the management of an application's resources.
 
 Here is a quick demonstration of what it can do in its current state of development:
 

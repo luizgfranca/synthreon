@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand/v2"
-	commonmodule "platformlab/controlpanel/modules/common"
+	commonmodule "synthreon/modules/common"
 	"sync"
 )
 

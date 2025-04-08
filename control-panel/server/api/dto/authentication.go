@@ -1,6 +1,6 @@
 package api
 
-import sessionmodule "platformlab/controlpanel/modules/session"
+import sessionmodule "synthreon/modules/session"
 
 type LoginRequestDto struct {
 	Email    string `json:"email"`

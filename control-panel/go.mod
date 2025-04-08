@@ -1,4 +1,4 @@
-module platformlab/controlpanel
+module synthreon
 
 go 1.22.5
 

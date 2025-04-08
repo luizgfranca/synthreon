@@ -5,10 +5,10 @@ import (
 
 	"gorm.io/gorm"
 
-	configurationmodule "platformlab/controlpanel/modules/configuration"
-	projectmodule "platformlab/controlpanel/modules/project"
-	toolmodule "platformlab/controlpanel/modules/tool"
-	usermodule "platformlab/controlpanel/modules/user"
+	configurationmodule "synthreon/modules/configuration"
+	projectmodule "synthreon/modules/project"
+	toolmodule "synthreon/modules/tool"
+	usermodule "synthreon/modules/user"
 )
 
 func doMigrations(db *gorm.DB) {

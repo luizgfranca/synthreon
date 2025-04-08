@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	sessionmodule "platformlab/controlpanel/modules/session"
-	usermodule "platformlab/controlpanel/modules/user"
-	api "platformlab/controlpanel/server/api/dto"
+	sessionmodule "synthreon/modules/session"
+	usermodule "synthreon/modules/user"
+	api "synthreon/server/api/dto"
 
 	"gorm.io/gorm"
 )

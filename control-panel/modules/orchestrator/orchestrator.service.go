@@ -2,15 +2,15 @@ package orchestratormodule
 
 import (
 	"log"
-	clientmodule "platformlab/controlpanel/modules/client"
-	configurationmodule "platformlab/controlpanel/modules/configuration"
-	projectmodule "platformlab/controlpanel/modules/project"
-	providermodule "platformlab/controlpanel/modules/provider"
-	sessionmodule "platformlab/controlpanel/modules/session"
-	toolmodule "platformlab/controlpanel/modules/tool"
-	"platformlab/controlpanel/modules/toolentity"
-	tooleventmodule "platformlab/controlpanel/modules/toolevent"
-	usermodule "platformlab/controlpanel/modules/user"
+	clientmodule "synthreon/modules/client"
+	configurationmodule "synthreon/modules/configuration"
+	projectmodule "synthreon/modules/project"
+	providermodule "synthreon/modules/provider"
+	sessionmodule "synthreon/modules/session"
+	toolmodule "synthreon/modules/tool"
+	"synthreon/modules/toolentity"
+	tooleventmodule "synthreon/modules/toolevent"
+	usermodule "synthreon/modules/user"
 )
 
 // TODO: should centralize the concept of context here,

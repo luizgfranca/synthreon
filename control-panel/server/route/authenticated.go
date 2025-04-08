@@ -2,7 +2,7 @@ package route
 
 import (
 	"log"
-	server "platformlab/controlpanel/server/handler"
+	server "synthreon/server/handler"
 
 	"github.com/gorilla/mux"
 )

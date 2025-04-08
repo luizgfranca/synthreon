@@ -1,7 +1,7 @@
 package sessionmodule
 
 import (
-	usermodule "platformlab/controlpanel/modules/user"
+	usermodule "synthreon/modules/user"
 
 	"github.com/google/uuid"
 )

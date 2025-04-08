@@ -1,8 +1,8 @@
 package clientmodule
 
 import (
-	projectmodule "platformlab/controlpanel/modules/project"
-	toolmodule "platformlab/controlpanel/modules/tool"
+	projectmodule "synthreon/modules/project"
+	toolmodule "synthreon/modules/tool"
 )
 
 type TerminalStatus string

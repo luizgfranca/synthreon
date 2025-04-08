@@ -3,7 +3,7 @@ package tooleventmodule
 import (
 	"encoding/json"
 	"log"
-	commonmodule "platformlab/controlpanel/modules/common"
+	commonmodule "synthreon/modules/common"
 	"strings"
 )
 

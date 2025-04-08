@@ -1,7 +1,7 @@
 package api
 
 import (
-	toolmodule "platformlab/controlpanel/modules/tool"
+	toolmodule "synthreon/modules/tool"
 )
 
 type CreateToolDto struct {

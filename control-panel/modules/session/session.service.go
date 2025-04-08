@@ -2,7 +2,7 @@ package sessionmodule
 
 import (
 	"fmt"
-	commonmodule "platformlab/controlpanel/modules/common"
+	commonmodule "synthreon/modules/common"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -21,7 +21,7 @@ type SessionService struct {
 
 func (s *SessionService) CreateToken(session Session) (*string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
-		"iss":   "platformlab",
+		"iss":   "synthreon",
 		"sub":   session.Email,
 		"email": session.Email,
 		"name":  session.Name,

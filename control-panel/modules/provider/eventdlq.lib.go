@@ -2,8 +2,8 @@ package providermodule
 
 import (
 	"log"
-	commonmodule "platformlab/controlpanel/modules/common"
-	tooleventmodule "platformlab/controlpanel/modules/toolevent"
+	commonmodule "synthreon/modules/common"
+	tooleventmodule "synthreon/modules/toolevent"
 	"sync"
 	"time"
 )

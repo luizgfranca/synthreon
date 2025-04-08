@@ -2,13 +2,13 @@ package clientmodule
 
 import (
 	"log"
-	commonmodule "platformlab/controlpanel/modules/common"
-	projectmodule "platformlab/controlpanel/modules/project"
-	sessionmodule "platformlab/controlpanel/modules/session"
-	toolmodule "platformlab/controlpanel/modules/tool"
-	"platformlab/controlpanel/modules/toolentity"
-	tooleventmodule "platformlab/controlpanel/modules/toolevent"
-	usermodule "platformlab/controlpanel/modules/user"
+	commonmodule "synthreon/modules/common"
+	projectmodule "synthreon/modules/project"
+	sessionmodule "synthreon/modules/session"
+	toolmodule "synthreon/modules/tool"
+	"synthreon/modules/toolentity"
+	tooleventmodule "synthreon/modules/toolevent"
+	usermodule "synthreon/modules/user"
 	"sync"
 
 	"github.com/google/uuid"

@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"platformlab/controlpanel/application"
-	configurationmodule "platformlab/controlpanel/modules/configuration"
-	"platformlab/controlpanel/server"
+	"synthreon/application"
+	configurationmodule "synthreon/modules/configuration"
+	"synthreon/server"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
