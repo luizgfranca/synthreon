@@ -13,7 +13,7 @@ export function ProjectHeader(props: ProjectHeaderProps) {
     return (
         <div className="flex items-center justify-between bg-zinc-900 h-12 px-2 w-100 border">
             <div className="flex items-center cursor-pointer" onClick={navigateHome}>
-                <span className="text-lg font-semibold">PlatformLab</span>
+                <span className="text-lg font-semibold">Synthreon</span>
             </div>
 
             <button 
