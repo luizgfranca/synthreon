@@ -9,7 +9,7 @@ yarn link
 cd ../../control-panel
 
 cd web
-yarn link platformlab-core
+yarn link @synthreon/core
 yarn build
 cd .. # web
 

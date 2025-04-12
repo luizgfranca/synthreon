@@ -1,4 +1,4 @@
-import { PromptType, ToolEventDto, EventTypeValue, ToolProperties } from 'platformlab-core'
+import { PromptType, ToolEventDto, EventTypeValue, ToolProperties } from '@synthreon/core'
 import { EventEmitter } from 'node:events'
 import { Execution } from './execution'
 import { ToolComponents } from './tool-components'

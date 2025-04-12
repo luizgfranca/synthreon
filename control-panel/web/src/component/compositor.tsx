@@ -1,4 +1,4 @@
-import { ToolEventDto } from 'platformlab-core';
+import { ToolEventDto } from '@synthreon/core';
 import { DisplayRenderer, Field } from "@/component/displayRenderer";
 import { useCallback } from 'react';
 import { EmptyState } from './emptyState';

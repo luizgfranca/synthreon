@@ -1,11 +1,11 @@
 import { EventEmitter } from 'node:events'
 import { ToolHandlerDefinition } from './handler'
 import { ComponentFactory, ToolComponents } from './tool-components'
-import { EventTypeValue, ToolEventDto } from 'platformlab-core'
+import { EventTypeValue, ToolEventDto } from '@synthreon/core'
 import { v4 as uuid } from 'uuid'
-import { InputDefinition } from 'platformlab-core/tool-event/input/input.dto'
-import { ToolEventResult } from 'platformlab-core/tool-event/result/result.dto'
-import { DisplayDefinition } from 'platformlab-core'
+import { InputDefinition } from '@synthreon/core/tool-event/input/input.dto'
+import { ToolEventResult } from '@synthreon/core/tool-event/result/result.dto'
+import { DisplayDefinition } from '@synthreon/core'
 
 type ForwardEventCallback = (event: ToolEventDto) => void
 type InputSubscriber = (input: InputDefinition) => void

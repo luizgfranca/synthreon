@@ -3,7 +3,7 @@ import { EmptyState } from "@/component/emptyState";
 import Compositor from "@/component/compositor";
 import BackendService from "@/service/backend.service";
 import { useCallback, useEffect, useState } from "react";
-import { ToolEventDto } from 'platformlab-core';
+import { ToolEventDto } from '@synthreon/core';
 
 const ToolEventEncoder = {
     encodeV0: (event: ToolEventDto): string => {

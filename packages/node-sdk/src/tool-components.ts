@@ -1,6 +1,6 @@
-import { DisplayTypeValue, PromptType, SelectionDisplay, TableDisplay } from 'platformlab-core'
+import { DisplayTypeValue, PromptType, SelectionDisplay, TableDisplay } from '@synthreon/core'
 import { Execution } from './execution'
-import { InputDefinition } from 'platformlab-core/tool-event/input/input.dto'
+import { InputDefinition } from '@synthreon/core/tool-event/input/input.dto'
 
 
 export type PromptParams = {

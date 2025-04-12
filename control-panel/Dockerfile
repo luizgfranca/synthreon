@@ -20,7 +20,7 @@ RUN mkdir -p web
 WORKDIR /app/web
 COPY control-panel/web/ .
 RUN yarn install
-RUN npm link platformlab-core
+RUN npm link @synthreon/core
 RUN yarn build
 
 #### FINAL CONTAINER

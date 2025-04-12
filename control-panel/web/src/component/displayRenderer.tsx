@@ -1,4 +1,4 @@
-import { ToolEventDto } from "platformlab-core";
+import { ToolEventDto } from "@synthreon/core";
 import { Prompt } from "./prompt";
 import { Result } from "./result";
 import { TextBox } from "./textBox";

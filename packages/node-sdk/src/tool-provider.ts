@@ -1,4 +1,4 @@
-import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue, ToolEventEncoder } from 'platformlab-core'
+import { PromptTypeOption, PromptType, ToolEventDto, EventTypeValue, ToolEventEncoder } from '@synthreon/core'
 import { EventEmitter } from 'node:events'
 import WebSocket, { RawData } from 'ws'
 import { Handler, HandlerExtraOptions, ToolFunction, ToolHandlerDefinition } from './handler'
