@@ -2,4 +2,5 @@ test.db
 *_templ.go
 env.sh
 controlpanel
+synthreon
 data
