@@ -33,9 +33,6 @@ function ProjectSidebarContent(props: ProjectSidebarProps) {
         props.onSelect(tool)
     }, [props, setSeletectedToolAcronym])
 
-    console.debug('tools', tools);
-    console.debug('selected', selectedToolAcronym);
-
     return (
         <div className='flex flex-1 flex-col justify-between'>
             <ul className="space-y-1">
@@ -46,7 +43,7 @@ function ProjectSidebarContent(props: ProjectSidebarProps) {
                             className={getItemStyle(tool.acronym === selectedToolAcronym)}
                             onClick={() => selectTool(tool)}
                         >
-                            {tool.name}
+                            {tool.name || tool.acronym}
                         </div>
                     </li>
                 ))}
