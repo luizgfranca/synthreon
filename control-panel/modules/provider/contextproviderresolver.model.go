@@ -31,6 +31,30 @@ func (c *ContextProviderResolver) Unregister(contextId string) {
 	delete(c.contextToProviderAssignment, contextId)
 }
 
+// UnregisterAndPop
+// returns nil if there's not any more assignment
+func (c *ContextProviderResolver) PopAndUnregister() (*string, *Provider) {
+    // TODO: this feels a bit hacky to me, should look if there's a better
+    // approach
+    var selected string
+    for k := range c.contextToProviderAssignment {
+        selected = k
+    }
+
+    if selected == "" {
+        return nil, nil
+    }
+
+    provider, ok := c.contextToProviderAssignment[selected];
+    if !ok {
+        panic("unexpected assignment not found after selection for popping")
+    }
+
+    c.Unregister(selected)
+
+    return &selected, provider
+}
+
 func (c *ContextProviderResolver) UnregisterProviderEntries(p *Provider) {
 	if p == nil {
 		log.Fatalln("provider to have contexts deregistered should not be null")

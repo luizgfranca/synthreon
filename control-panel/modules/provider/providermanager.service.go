@@ -12,6 +12,7 @@ import (
 
 type Orchestrator interface {
 	ForwardEventToClient(e *tooleventmodule.ToolEvent)
+    NotifyProviderError(contextId string, error ProviderError)
 }
 
 // FIXME: add project and tool deregistration handling
@@ -36,6 +37,27 @@ type ProviderManagerService struct {
 	providers []*Provider
 }
 
+// closeActiveContexts: provider should not be null
+func (p *ProviderManagerService) closeActiveContexts(provider *Provider) {
+	if provider == nil {
+		log.Fatalln("closeActiveContexts: provider to hould not be null")
+	}
+
+	for {
+		ctxId, provider := p.contextProviderResolver.PopAndUnregister()
+		if ctxId == nil {
+			break
+		}
+
+		p.log(
+			"unregistered context/provider mapping <",
+			ctxId, provider.ID,
+			">, notifying disconnection",
+		)
+		p.orchestrator.NotifyProviderError(*ctxId, ProviderErrorDisconnection)
+	}
+}
+
 // OnProviderDisconnection implements Manager.
 func (p *ProviderManagerService) OnProviderDisconnection(provider *Provider) {
 	if provider == nil {
@@ -43,8 +65,8 @@ func (p *ProviderManagerService) OnProviderDisconnection(provider *Provider) {
 	}
 
 	p.log("provider ", provider.ID, " disconnected, degeristering mappings")
+	p.closeActiveContexts(provider)
 	p.projectAndToolProviderResolver.UnregisterProviderEntries(provider)
-	p.contextProviderResolver.UnregisterProviderEntries(provider)
 
 	// TODO: could this have a race condition if the provider unregisters right after connecting?
 	for i, it := range p.providers {

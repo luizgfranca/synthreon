@@ -146,6 +146,11 @@ func (e *WebsocketToolEntity) messageReceiverThread() {
 		// TODO: when the event is invalid, should i just drop it like this?
 		event, err := tooleventmodule.ParseEventString(&messageString)
 		if err != nil {
+            // FIXME: when the message from a provider is invalid, we should have
+            // a better way to handle it, giving more information to the client
+            // and to the provider about the message. For instance, 
+            // it may have been only the message field of a response that is 
+            // malformed, but in this way there's no way to discern this
 			e.log("websocket message payload parsing error: ", err.Error())
 			break
 		}

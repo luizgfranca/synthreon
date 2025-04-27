@@ -37,4 +37,4 @@ COPY --from=backend-build /app/synthreon .
 COPY --from=frontend-build /app/web/dist web/dist
 RUN mkdir /data
 
-CMD ["/bin/sh", "-c", "/app/synthreon"]
+CMD ["/bin/sh", "-c", "/app/controlpanel"]

@@ -442,3 +442,12 @@ func (p *Provider) handleActiveProviderEvent(e *tooleventmodule.ToolEvent) {
 
 	p.manager.DistributeEvent(e)
 }
+
+
+
+
+type ProviderError string
+
+const (
+    ProviderErrorDisconnection ProviderError = "disconnected"
+)
