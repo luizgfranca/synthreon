@@ -56,11 +56,29 @@ export class Execution {
             .then((resultMessage) => {
                 console.debug('executing success result trap')
                 this.#bus.removeAllListeners(this.#id)
+                
+                // TODO: generalize this behavior
+                if(!this.#isValidResponseMessage(resultMessage)) {
+                    // TODO: find a better way to form this strings
+                    console.error('ERROR: invalid response message sent by tool definition. Response message should be a string, but the value given was\n', resultMessage) ;
+                    this.sendResult({status: 'failure', message: "Invalid result message returned by provider. Please verify the provider instance for details"});
+                    return 
+                }
+
                 this.sendResult({status: 'success', message: resultMessage})
             })
             .catch((errorMessage) => {
                 console.debug('executing error result trap')
                 this.#bus.removeAllListeners(this.#id)
+
+                // TODO: generalize this behavior
+                if(!this.#isValidResponseMessage(errorMessage)) {
+                    // TODO: find a better way to form this strings
+                    console.error('ERROR: invalid error response message sent by tool definition. Response message should be a string, but the value given was\n', errorMessage) ;
+                    this.sendResult({status: 'failure', message: "Invalid result message returned by provider. Please verify the provider instance for details"});
+                    return 
+                }
+
                 this.sendResult({status: 'failure', message: errorMessage})
             })
         
@@ -128,5 +146,9 @@ export class Execution {
         event.context_id = this.#contextId
 
         this.#forwardEvent(event)
+    }
+    
+    #isValidResponseMessage(message: unknown): boolean {
+        return typeof message === 'string';
     }
 }
