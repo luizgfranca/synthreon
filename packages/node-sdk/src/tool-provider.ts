@@ -57,13 +57,7 @@ export class ToolProvider {
     }
 
     listen() {
-        console.log('authstr', `${this.#credentials.username}:${this.#credentials.password}`)
-        console.log('authorization', `Basic ${Buffer.from(
-                        `${this.#credentials.username}:${
-                            this.#credentials.password
-                        }`
-                    ).toString('base64')}`)
-
+        console.log('connecting to server');
         try {
             this.#websocket = new WebSocket(this.#endpoint, {
                 headers: {
