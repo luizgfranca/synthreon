@@ -22,7 +22,7 @@ function goToAuthentication() {
     return window.location.replace(`${import.meta.env.PL_PATH_PREFIX}/login`)
 }
 
-function request(
+async function request(
     path: string,
     config?: RequestInit,
 ) {
@@ -32,17 +32,27 @@ function request(
     }
     const accessToken = maybeAccessToken;
 
-    return fetch(
-        BASE_URL + path,
-        {
-            ...config,
-            headers: {
-                ...config?.headers,
-                ...DEFAULT_HEADERS,
-                'Authorization': `Bearer ${accessToken}`
+    try {
+        const response = await fetch(
+            BASE_URL + path,
+            {
+                ...config,
+                headers: {
+                    ...config?.headers,
+                    ...DEFAULT_HEADERS,
+                    'Authorization': `Bearer ${accessToken}`
+                }
             }
+        )
+
+        if (response.status === 401) {
+            goToAuthentication();
         }
-    )
+        return response;
+    } catch (e) {
+        console.error('fetch exception', e)
+        throw e
+    }
 }
 
 const BackendService = {
