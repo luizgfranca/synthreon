@@ -4,12 +4,17 @@ import { Datasource } from "suspense-datasource";
 
 export class ToolDatasource extends Datasource<ToolDto[]> {
     async fetch(projectAcronym: string): Promise<ToolDto[]> {
-        // FIXME: temporary, disabling the cache until better implementation
-        // that will invalidate the cache when:
-        //  - a certain time has passed
-        //  - there was a timeout
-        this.reset();
-        return await ToolService.queryProjectTools(projectAcronym);
+        return await ToolService.queryProjectTools(projectAcronym)
+            .finally(() => {
+                // FIXME: temporary, disabling the cache until better implementation
+                // that will invalidate the cache when:
+                //  - a certain time has passed
+                //  - there was a timeout
+                //  needs the setTimeout to put the reset on the back of the microtask
+                //  queue instead of running it before the valua can be effectivelly
+                //  returned by the get
+                setTimeout(() => this.reset(projectAcronym), 1);
+            });
     }
 
     async create(projectAcronym: string, data: NewToolDto) {
