@@ -2,7 +2,7 @@
 
 This is a step-by-step guide that will help you create your first simple Synthreon tool. Here we will explore the basic concepts in order to understand how to work with Synthreon, how to setup your development environment, and finally, how to build the code for your interaction. All of this, using as a practical example a simple task time tracker tool, a simple timer to monitor how much time you are taking to do a set of tasks so you can understand how long you've taken on each one. 
 
-All the code used here can be accessed in the example repository on github: [url]
+All the code used here can be accessed in the example repository on github: [link](https://github.com/luizgfranca/synthreon-getting-started-example)
 
 
 #### Setting up the server
@@ -42,7 +42,7 @@ This is the screen for interacting with the tools you created. Select the `Sandb
 
 For the tool development you can currently choose between Node.js or Bun. Although Bun is highly recommended. 
 
-The following instructions are for bun, you can install Bun following the instructions in [https://bun.sh](https://bun.sh). But doing the equivalent using Node.js with Yarn or NPM should also be possible.
+The following instructions are for Bun, you can install Bun following the instructions in [https://bun.sh](https://bun.sh). But doing the equivalent using Node.js with Yarn or NPM should also be possible.
 
 First create your new project and enter its directory:
 ```
@@ -235,7 +235,7 @@ This one uses a `io.selection` component. This component shows a list of cards f
 With this simple steps we have a complete set of behaviors for a simple task timer.
 
 
-### How to go from here.
+### Where to go from here.
 
 As was said in the beginning, this is a very simple example to demonstrate the basic principles of developing tools with Synthreon, but there are many ways it is useful to automate processes, and easily expose interfaces to control your applications, without taking on big projects. If it was your intention to make this automation more complete, your could, for instancce, use a generic ORM or database library here to integrate with an existing or a dedicated database, any concept you can use in JS development, you can also use here, without being tied down by a specific runtime, or low-code development process.
 
